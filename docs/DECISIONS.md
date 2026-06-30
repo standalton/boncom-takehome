@@ -8,6 +8,40 @@ Format: newest first.
 
 ---
 
+## 2026-06-30 — Estimate app design locked
+
+Full design: `docs/superpowers/specs/2026-06-30-estimate-app-design.md`. Headline
+decisions and the reasoning behind them:
+
+- **Supabase as source of truth** (Postgres + Auth + RLS + Realtime) on a new
+  dedicated project (~$10/mo, deletable after the interview). One service covers
+  DB, the 3-user login, security, and realtime. *Why:* paper-trail/record-keeping
+  needs a real DB; Supabase bundles what we need with least setup.
+- **Shared team workspace, not per-user silos.** All authenticated users see/edit
+  everything; changes are attributed via `created_by`/`updated_by`. *Why:* agencies
+  collaborate on the same client quotes; simpler than isolation and makes the
+  audit log meaningful.
+- **Tax applied after discount; both % and fixed discounts at line and order
+  level; one tax rate per estimate; math in integer cents.** *Why:* you don't tax
+  money the customer didn't pay; cents avoid float drift; per-line tax is YAGNI.
+- **No tax/money libraries.** Tax is a user-entered rate (not jurisdictional
+  compliance); integer-cent math is exact. `lib/pricing` stays dependency-free.
+- **Snapshot pricing on line items; append-only audit log; stored totals on the
+  quote.** *Why:* sent quotes must not change when a product's price later changes;
+  an editable audit trail isn't an audit trail; stored totals make the dashboard
+  fast and record the figure at save time.
+- **Supabase Realtime over socket.io** for the "new version available" toast.
+  *Why:* socket.io can't run on Vercel's serverless model and would need a separate
+  always-on server; Realtime is already in the stack and free.
+- **shadcn/ui + Tabler icons** over Mantine/HeroUI. *Why:* prebuilt + accessible
+  but fully re-brandable to the Boncom look; Tabler icons natively supported.
+- **Explicit save (not autosave); Export (not Send).** *Why:* estimates are
+  deliberate documents — explicit saves give clean audit entries; we have no email
+  integration, so a downloadable document is the honest, useful action.
+- **Phased build, core-first.** Phase 1 fully satisfies the brief on its own;
+  enhancements (duplicate, catalog, per-line discounts, pipeline, timeline, export,
+  realtime) and the AI generator layer on only if the core is airtight.
+
 ## 2026-06-30 — Testing, security, and review workflow
 
 - **Decision:** Adopt a multi-layer testing strategy (unit, integration, E2E,
