@@ -57,7 +57,7 @@ export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
             <TableRow
               key={quote.id}
               onClick={() => router.push(`/quotes/${quote.id}`)}
-              className="cursor-pointer transition-colors hover:bg-muted/50"
+              className="cursor-pointer select-none transition-colors hover:bg-muted/50"
             >
               <TableCell className="font-medium text-primary">{quote.number}</TableCell>
               <TableCell>{quote.clients?.name ?? "—"}</TableCell>

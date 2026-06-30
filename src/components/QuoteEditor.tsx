@@ -195,7 +195,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
           </div>
 
           <div className="overflow-hidden rounded-xl border">
-            <div className="grid grid-cols-[1fr_64px_112px_96px_28px] gap-3 border-b bg-muted/40 px-4 py-2.5 text-xs font-medium text-muted-foreground">
+            <div className="grid grid-cols-[minmax(0,1fr)_3.25rem_7rem_5.5rem_2rem] gap-2 border-b bg-muted/40 px-4 py-2.5 text-xs font-medium text-muted-foreground">
               <span>Description</span>
               <span className="text-center">Qty</span>
               <span>Rate</span>

@@ -53,10 +53,10 @@ export function LineItemRow({
 
   return (
     <div className="border-b px-4 py-3 transition-colors last:border-b-0 hover:bg-muted/30">
-      <div className="flex items-center gap-3">
+      <div className="grid grid-cols-[minmax(0,1fr)_3.25rem_7rem_5.5rem_2rem] items-center gap-2">
         <Input
           placeholder="Description"
-          className="flex-1"
+          className="min-w-0"
           value={description}
           onChange={(e) => onChange({ description: e.target.value })}
         />
@@ -65,18 +65,17 @@ export function LineItemRow({
           min={0}
           step="0.5"
           aria-label="Quantity"
-          className="w-16 text-center"
+          className="px-1 text-center"
           value={quantity || ""}
           placeholder="1"
           onChange={(e) => onChange({ quantity: Number(e.target.value) })}
         />
         <MoneyInput
-          className="w-28"
           aria-label="Rate"
           valueCents={rateCents}
           onChangeCents={(cents) => onChange({ rateCents: cents })}
         />
-        <span className="w-24 text-right text-sm font-medium tabular-nums">
+        <span className="truncate text-right text-sm font-medium tabular-nums">
           {formatCents(lineNetCents)}
         </span>
         <Button variant="ghost" size="icon-sm" aria-label="Remove line" onClick={onRemove}>
