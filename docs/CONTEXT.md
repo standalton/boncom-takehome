@@ -1,7 +1,7 @@
 # Project Map (AI / Developer Index)
 
 A fast index of this codebase. Read this first to find where something lives
-*without* reading every file. For the working *rules*, see `CLAUDE.md`.
+*without* reading every file. For the working *rules*, see `../CLAUDE.md`.
 
 > Keep this file in sync. Any file added, moved, or removed updates the relevant
 > section here in the same change. A stale map is worse than no map.
@@ -32,9 +32,9 @@ _Populated when the project is scaffolded. Format:_
 | ---- | -------------- |
 | `README.md` | Human entry point: what the app is and how to run it. |
 | `CLAUDE.md` | Working rules and conventions. |
-| `CONTEXT.md` | This file — the project map / index. |
-| `STYLE_GUIDE.md` | Design tokens and visual rules (matched to Boncom brand). |
-| `DECISIONS.md` | Dated log of meaningful decisions and tradeoffs. |
+| `docs/CONTEXT.md` | This file — the project map / index. |
+| `docs/STYLE_GUIDE.md` | Design tokens and visual rules (matched to Boncom brand). |
+| `docs/DECISIONS.md` | Dated log of meaningful decisions and tradeoffs. |
 
 ---
 
@@ -50,6 +50,8 @@ codebase grows. Format:_
 | _(e.g. data fetching / API calls)_ | _(e.g. `src/lib/api/`)_ |
 | _(e.g. reusable helpers/utilities)_ | _(e.g. `src/lib/utils/`)_ |
 | _(e.g. types/models)_ | _(e.g. `src/types/`)_ |
+| _(e.g. unit / integration tests)_ | _(e.g. colocated `*.test.ts` or `tests/`)_ |
+| _(e.g. E2E tests)_ | _(e.g. `e2e/`)_ |
 
 ---
 

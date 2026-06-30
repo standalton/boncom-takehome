@@ -8,6 +8,19 @@ Format: newest first.
 
 ---
 
+## 2026-06-30 — Testing, security, and review workflow
+
+- **Decision:** Adopt a multi-layer testing strategy (unit, integration, E2E,
+  type-checking, accessibility, performance) plus defensive security testing
+  (dependency and secret scanning, static analysis, per-feature OWASP review,
+  pentest-style checks on sensitive flows). Every feature must pass tests and a
+  code review before it is considered done.
+- **Why:** Quality, security, and edge-case handling are explicit grading
+  signals; baking the discipline into the conventions ensures it is applied from
+  the first feature rather than retrofitted.
+- **Note:** Concrete test frameworks are deferred until the stack is chosen, to
+  avoid speculative setup.
+
 ## 2026-06-30 — Match Boncom brand for the UI
 
 - **Decision:** Adopt Boncom's external brand (boncom.com) as the project's
