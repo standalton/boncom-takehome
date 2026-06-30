@@ -12,7 +12,7 @@ export default async function NewQuotePage() {
   const clients = res.ok ? res.data : [];
   return (
     <NewQuoteStarter
-      clients={clients.map((c) => ({ id: c.id, name: c.name, company: c.company }))}
+      clients={clients.map((c) => ({ id: c.id, company: c.company, contactName: c.contact_name }))}
     />
   );
 }

@@ -25,7 +25,10 @@ export function NewQuoteStarter({ clients: initialClients }: { clients: ClientOp
   const router = useRouter();
 
   function addClient(client: Client) {
-    setClients((prev) => [...prev, { id: client.id, name: client.name, company: client.company }]);
+    setClients((prev) => [
+      ...prev,
+      { id: client.id, company: client.company, contactName: client.contact_name },
+    ]);
   }
 
   function create() {

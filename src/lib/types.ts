@@ -11,9 +11,10 @@ export type QuoteStatus = "draft" | "sent" | "accepted" | "paid" | "declined";
 
 export interface Client {
   id: string;
-  name: string;
-  company: string | null;
+  company: string;
+  contact_name: string | null;
   email: string | null;
+  phone: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

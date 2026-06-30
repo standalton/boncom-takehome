@@ -38,7 +38,7 @@ export default async function QuotePage({ params }: { params: Promise<{ id: stri
       number={q.number}
       status={q.status}
       clientId={q.client_id}
-      clients={clients.map((c) => ({ id: c.id, name: c.name, company: c.company }))}
+      clients={clients.map((c) => ({ id: c.id, company: c.company, contactName: c.contact_name }))}
       taxRatePercent={Number(q.tax_rate)}
       orderDiscountType={q.discount_type}
       orderDiscountValue={Number(q.discount_value)}

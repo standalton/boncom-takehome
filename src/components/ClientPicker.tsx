@@ -1,29 +1,25 @@
 /**
  * ClientPicker.tsx — searchable customer selector with inline "add new".
  *
- * What:        A combobox that filters clients as you type and selects one. A
- *              pinned footer action opens the New customer dialog; the created
- *              client is added to the list and selected immediately.
- * Where used:  The quote editor's Client field.
- * Notes:       Built on Base UI's Combobox (filtering is built in). Item values
- *              are { value, label } objects, so the label shows in the input and
- *              the id is what we report via onChange.
+ * What:        A select-style trigger showing the chosen company. Opening it
+ *              reveals a search box that filters customers by company or contact,
+ *              plus a pinned "Add new customer" action.
+ * Where used:  The quote editor's Client field and the new-quote starter.
+ * Notes:       Built on Base UI's Combobox. The closed state is a button (not a
+ *              text input), so there's no blinking caret on the selected value;
+ *              the search input lives inside the popup and only shows when open.
  */
 "use client";
 
 import { useMemo, useState } from "react";
 import { Combobox } from "@base-ui/react/combobox";
-import { Check, ChevronsUpDown, UserPlus } from "lucide-react";
+import { Check, ChevronsUpDown, Search, UserPlus } from "lucide-react";
 import type { Client } from "@/lib/types";
 import { NewClientDialog } from "@/components/NewClientDialog";
 
-export type ClientOption = { id: string; name: string; company: string | null };
+export type ClientOption = { id: string; company: string; contactName: string | null };
 
-type Item = { value: string; label: string };
-
-function labelFor(c: ClientOption) {
-  return c.company ? `${c.name} — ${c.company}` : c.name;
-}
+type Item = { value: string; label: string; company: string; contact: string | null };
 
 type Props = {
   clients: ClientOption[];
@@ -34,17 +30,20 @@ type Props = {
 
 export function ClientPicker({ clients, value, onChange, onClientAdded }: Props) {
   const items = useMemo<Item[]>(
-    () => clients.map((c) => ({ value: c.id, label: labelFor(c) })),
+    () =>
+      clients.map((c) => ({
+        value: c.id,
+        // label drives filtering, so include the contact name as well as company.
+        label: c.contactName ? `${c.company} ${c.contactName}` : c.company,
+        company: c.company,
+        contact: c.contactName,
+      })),
     [clients],
   );
   const selected = items.find((i) => i.value === value) ?? null;
 
   const [query, setQuery] = useState("");
   const [addOpen, setAddOpen] = useState(false);
-
-  function openAdd() {
-    setAddOpen(true);
-  }
 
   return (
     <>
@@ -56,44 +55,64 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
         }}
         onInputValueChange={(text) => setQuery(text)}
       >
-        <div className="relative">
-          <Combobox.Input
-            placeholder="Search customers…"
-            className="h-10 w-full rounded-lg border border-input bg-transparent pr-9 pl-3 text-sm outline-none transition-colors hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
-          />
-          <Combobox.Icon className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground">
-            <ChevronsUpDown className="size-4" />
-          </Combobox.Icon>
-        </div>
+        <Combobox.Trigger className="flex h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-3 text-left text-sm outline-none transition-colors hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 data-popup-open:border-ring">
+          <Combobox.Value>
+            {(val: Item | null) =>
+              val ? (
+                <span className="line-clamp-1">{val.company}</span>
+              ) : (
+                <span className="text-muted-foreground">Select a customer…</span>
+              )
+            }
+          </Combobox.Value>
+          <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
+        </Combobox.Trigger>
 
         <Combobox.Portal>
           <Combobox.Positioner sideOffset={4} className="isolate z-50 w-(--anchor-width)">
-            <Combobox.Popup className="max-h-72 w-full overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0">
-              {/* Stays mounted for screen-reader announcements; padding lives on
-                  the inner node so the block collapses when there are matches. */}
-              <Combobox.Empty className="text-center text-sm text-muted-foreground">
-                <div className="px-3 py-6">No customers match “{query}”.</div>
-              </Combobox.Empty>
+            <Combobox.Popup className="w-full overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0">
+              <div className="flex items-center gap-2 border-b px-3">
+                <Search className="size-4 shrink-0 text-muted-foreground" />
+                <Combobox.Input
+                  placeholder="Search customers…"
+                  className="h-10 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                />
+              </div>
 
-              <Combobox.List>
-                {(item: Item) => (
-                  <Combobox.Item
-                    key={item.value}
-                    value={item}
-                    className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm outline-none select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-                  >
-                    <span className="line-clamp-1">{item.label}</span>
-                    <Combobox.ItemIndicator>
-                      <Check className="size-4 text-primary" />
-                    </Combobox.ItemIndicator>
-                  </Combobox.Item>
-                )}
-              </Combobox.List>
+              <div className="max-h-64 overflow-y-auto p-1">
+                {/* Stays mounted for screen-reader announcements; padding lives on
+                    the inner node so the block collapses when there are matches. */}
+                <Combobox.Empty className="text-center text-sm text-muted-foreground">
+                  <div className="px-3 py-6">No customers match “{query}”.</div>
+                </Combobox.Empty>
 
-              <div className="mt-1 border-t pt-1">
+                <Combobox.List>
+                  {(item: Item) => (
+                    <Combobox.Item
+                      key={item.value}
+                      value={item}
+                      className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm outline-none select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                    >
+                      <span className="min-w-0">
+                        <span className="line-clamp-1 font-medium">{item.company}</span>
+                        {item.contact && (
+                          <span className="line-clamp-1 text-xs text-muted-foreground">
+                            {item.contact}
+                          </span>
+                        )}
+                      </span>
+                      <Combobox.ItemIndicator>
+                        <Check className="size-4 shrink-0 text-primary" />
+                      </Combobox.ItemIndicator>
+                    </Combobox.Item>
+                  )}
+                </Combobox.List>
+              </div>
+
+              <div className="border-t p-1">
                 <button
                   type="button"
-                  onClick={openAdd}
+                  onClick={() => setAddOpen(true)}
                   className="flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-primary outline-none transition-colors hover:bg-accent"
                 >
                   <UserPlus className="size-4" />
@@ -108,7 +127,7 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
       <NewClientDialog
         open={addOpen}
         onOpenChange={setAddOpen}
-        initialName={query.trim()}
+        initialCompany={query.trim()}
         onCreated={(client) => {
           onClientAdded(client);
           onChange(client.id);

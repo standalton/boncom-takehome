@@ -13,18 +13,19 @@ import { createClient } from "@/lib/supabase/server";
 import type { Client } from "@/lib/types";
 
 const clientInput = z.object({
-  name: z.string().min(1, "Name is required"),
-  company: z.string().optional().default(""),
+  company: z.string().min(1, "Company is required"),
+  contactName: z.string().optional().default(""),
   email: z
     .string()
     .optional()
     .default("")
     .refine((v) => !v || /.+@.+\..+/.test(v), "Enter a valid email"),
+  phone: z.string().optional().default(""),
 });
 
 export async function listClients() {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("clients").select("*").order("name");
+  const { data, error } = await supabase.from("clients").select("*").order("company");
   if (error) return { ok: false as const, error: error.message };
   return { ok: true as const, data: data as Client[] };
 }
@@ -42,9 +43,10 @@ export async function createClientRecord(input: unknown) {
   const { data, error } = await supabase
     .from("clients")
     .insert({
-      name: parsed.data.name,
-      company: parsed.data.company || null,
+      company: parsed.data.company,
+      contact_name: parsed.data.contactName || null,
       email: parsed.data.email || null,
+      phone: parsed.data.phone || null,
       created_by: user?.id,
     })
     .select()

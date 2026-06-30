@@ -30,32 +30,34 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (client: Client) => void;
-  initialName?: string;
+  initialCompany?: string;
 };
 
-export function NewClientDialog({ open, onOpenChange, onCreated, initialName = "" }: Props) {
-  const [name, setName] = useState(initialName);
-  const [company, setCompany] = useState("");
+export function NewClientDialog({ open, onOpenChange, onCreated, initialCompany = "" }: Props) {
+  const [company, setCompany] = useState(initialCompany);
+  const [contactName, setContactName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startCreate] = useTransition();
 
-  // Reset the form each time the dialog opens (prefilling the typed-in name).
+  // Reset the form each time the dialog opens (prefilling the typed-in company).
   useEffect(() => {
     if (open) {
-      setName(initialName);
-      setCompany("");
+      setCompany(initialCompany);
+      setContactName("");
       setEmail("");
+      setPhone("");
       setError(null);
     }
-  }, [open, initialName]);
+  }, [open, initialCompany]);
 
   function submit() {
     setError(null);
     startCreate(async () => {
-      const res = await createClientRecord({ name, company, email });
+      const res = await createClientRecord({ company, contactName, email, phone });
       if (res.ok) {
-        toast.success(`Added ${res.data.name}`);
+        toast.success(`Added ${res.data.company}`);
         onCreated(res.data);
         onOpenChange(false);
       } else {
@@ -81,33 +83,45 @@ export function NewClientDialog({ open, onOpenChange, onCreated, initialName = "
           }}
         >
           <div className="grid gap-1.5">
-            <Label htmlFor="client-name">Name</Label>
-            <Input
-              id="client-name"
-              autoFocus
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Jane Cooper"
-            />
-          </div>
-          <div className="grid gap-1.5">
             <Label htmlFor="client-company">Company</Label>
             <Input
               id="client-company"
+              autoFocus
               value={company}
               onChange={(e) => setCompany(e.target.value)}
-              placeholder="Acme Inc. (optional)"
+              placeholder="Acme Inc."
             />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="client-email">Email</Label>
+            <Label htmlFor="client-contact">Contact name</Label>
             <Input
-              id="client-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="jane@acme.com (optional)"
+              id="client-contact"
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+              placeholder="Jane Cooper (optional)"
             />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="client-email">Email</Label>
+              <Input
+                id="client-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="jane@acme.com"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="client-phone">Phone</Label>
+              <Input
+                id="client-phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="(555) 123-4567"
+              />
+            </div>
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
@@ -116,7 +130,7 @@ export function NewClientDialog({ open, onOpenChange, onCreated, initialName = "
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={pending || !name.trim()}>
+            <Button type="submit" disabled={pending || !company.trim()}>
               {pending ? "Adding…" : "Add customer"}
             </Button>
           </DialogFooter>

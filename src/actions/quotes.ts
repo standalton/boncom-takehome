@@ -22,7 +22,7 @@ export async function listQuotes(search?: string) {
   const supabase = await createClient();
   let query = supabase
     .from("quotes")
-    .select("*, clients(name, company)")
+    .select("*, clients(company, contact_name)")
     .order("updated_at", { ascending: false });
   if (search && search.trim()) {
     query = query.ilike("number", `%${search.trim()}%`);

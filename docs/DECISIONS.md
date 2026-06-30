@@ -8,6 +8,26 @@ Format: newest first.
 
 ---
 
+## 2026-06-30 — A client is a company (contact attached)
+
+- **Decision:** Reframe a client as a **company** (the billable entity, required)
+  with optional contact details — contact name, email, phone. Migration `0003`
+  renames the old person `name` to `contact_name`, backfills/locks `company` as
+  NOT NULL, and adds `phone`. Lists and the customer picker lead with company,
+  contact shown as a subtitle.
+- **Why:** Agencies quote *companies*, not individuals; the company is the stable
+  identity and a quote bills to it. Contact info hangs off that.
+
+## 2026-06-30 — Customer picker is a select-style combobox
+
+- **Decision:** The closed customer field is a button (`Combobox.Trigger` +
+  `Combobox.Value`), not a text input; the search box lives inside the open
+  popup. Consolidated the two client-create dialogs into one (`NewClientDialog`),
+  reused by both the picker and the clients page.
+- **Why:** A text input on the closed field showed a blinking caret, making a
+  selected customer look editable. A button trigger reads as a picker and only
+  becomes a search field when open. One dialog avoids divergent create forms.
+
 ## 2026-06-30 — Standardize on "quote"; editable quote number
 
 - **Decision:** Use "quote" consistently in the UI (the product is *kwik-quote*)

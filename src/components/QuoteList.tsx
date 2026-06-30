@@ -34,7 +34,7 @@ export type QuoteListRow = {
   status: QuoteStatus;
   total_cents: number;
   updated_at: string;
-  clients: { name: string; company: string | null } | null;
+  clients: { company: string; contact_name: string | null } | null;
 };
 
 export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
@@ -60,7 +60,7 @@ export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
               className="cursor-pointer select-none transition-colors hover:bg-muted/50 [&_td]:cursor-pointer"
             >
               <TableCell className="font-medium text-primary">{quote.number}</TableCell>
-              <TableCell>{quote.clients?.name ?? "—"}</TableCell>
+              <TableCell>{quote.clients?.company ?? "—"}</TableCell>
               <TableCell>
                 <span
                   className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusStyles[quote.status]}`}

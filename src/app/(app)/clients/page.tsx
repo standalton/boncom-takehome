@@ -39,17 +39,19 @@ export default async function ClientsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
                 <TableHead>Company</TableHead>
+                <TableHead>Contact</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {clients.map((c) => (
                 <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell>{c.company ?? "—"}</TableCell>
+                  <TableCell className="font-medium">{c.company}</TableCell>
+                  <TableCell>{c.contact_name ?? "—"}</TableCell>
                   <TableCell>{c.email ?? "—"}</TableCell>
+                  <TableCell>{c.phone ?? "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

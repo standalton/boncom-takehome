@@ -110,7 +110,10 @@ export function QuoteEditor(props: QuoteEditorProps) {
     setDirty(true);
   }
   function addClient(client: Client) {
-    setClients((prev) => [...prev, { id: client.id, name: client.name, company: client.company }]);
+    setClients((prev) => [
+      ...prev,
+      { id: client.id, company: client.company, contactName: client.contact_name },
+    ]);
     setDirty(true);
   }
 

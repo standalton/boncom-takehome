@@ -39,11 +39,11 @@ insert into products (name, description, default_rate_cents, unit) values
 ('SEO Retainer','Ongoing search optimization and monthly reporting', 180000, 'month'),
 ('Brand Guidelines','Comprehensive brand standards document', 350000, 'project');
 
--- Clients
-insert into clients (id, name, company, email, created_by) values
-('aaaaaaa1-0000-0000-0000-000000000001','Dana Whitfield','Northwind Foods','dana@northwindfoods.com','11111111-1111-1111-1111-111111111111'),
-('aaaaaaa1-0000-0000-0000-000000000002','Priya Anand','Lumen Health','priya@lumenhealth.io','22222222-2222-2222-2222-222222222222'),
-('aaaaaaa1-0000-0000-0000-000000000003','Marcus Bell','Trailhead Outdoors','marcus@trailhead.co','11111111-1111-1111-1111-111111111111');
+-- Clients (a client is a company; the contact person is attached)
+insert into clients (id, company, contact_name, email, phone, created_by) values
+('aaaaaaa1-0000-0000-0000-000000000001','Northwind Foods','Dana Whitfield','dana@northwindfoods.com','(415) 555-0142','11111111-1111-1111-1111-111111111111'),
+('aaaaaaa1-0000-0000-0000-000000000002','Lumen Health','Priya Anand','priya@lumenhealth.io','(312) 555-0188','22222222-2222-2222-2222-222222222222'),
+('aaaaaaa1-0000-0000-0000-000000000003','Trailhead Outdoors','Marcus Bell','marcus@trailhead.co','(503) 555-0119','11111111-1111-1111-1111-111111111111');
 
 -- Sample quotes (totals match src/lib/pricing.ts)
 insert into quotes (id, client_id, status, tax_rate, discount_type, discount_value, notes, subtotal_cents, discount_cents, tax_cents, total_cents, created_by, updated_by) values
