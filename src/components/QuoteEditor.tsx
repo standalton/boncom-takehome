@@ -2,13 +2,12 @@
  * QuoteEditor.tsx — the core estimate editor.
  *
  * What:        Edit a quote's client, line items (each with an optional
- *              discount), order-level discount, tax, notes, and status, with
- *              totals updating live as you type. Save persists via saveQuote.
+ *              discount), order-level discount, tax, notes, and status. Totals
+ *              update live in a sticky bottom bar that stays pinned as you edit.
  * Where used:  The /quotes/[id] route.
  * Notes:       Totals come from the SAME lib/pricing.computeTotals the server
  *              uses, so the preview and the saved figure cannot diverge.
- *              Layout uses inline gridTemplateColumns (LINE_GRID) so column
- *              alignment can't be lost to CSS caching.
+ *              Column alignment uses inline gridTemplateColumns (cache-proof).
  */
 "use client";
 
@@ -25,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MoneyInput } from "@/components/MoneyInput";
 import { HelpHint } from "@/components/HelpHint";
-import { LineItemRow, LINE_GRID, type LineItemPatch } from "@/components/LineItemRow";
+import { LineItemRow, type LineItemPatch } from "@/components/LineItemRow";
 
 type EditorLine = {
   key: string;
@@ -151,50 +150,43 @@ export function QuoteEditor(props: QuoteEditorProps) {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-8 py-8">
-      {/* Header */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4 border-b pb-5">
-        <div>
-          <div className={eyebrow}>Estimate</div>
-          <div className="mt-1.5 flex items-center gap-3">
-            <h1 className="text-3xl font-light tracking-tight text-primary">{props.number}</h1>
-            {dirty && (
-              <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
-                Unsaved
-              </span>
-            )}
+    <>
+      <div className="px-8 pt-8 pb-32">
+        {/* Header */}
+        <div className="mx-auto mb-8 flex max-w-3xl flex-wrap items-start justify-between gap-4 border-b pb-5">
+          <div>
+            <div className={eyebrow}>Estimate</div>
+            <div className="mt-1.5 flex items-center gap-3">
+              <h1 className="text-3xl font-light tracking-tight text-primary">{props.number}</h1>
+              {dirty && (
+                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
+                  Unsaved
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <HelpHint text={helpText.status} />
+            <span className="inline-flex items-center gap-2 rounded-lg border px-3 py-2">
+              <span className="size-2 rounded-full" style={{ background: statusDot[status] }} aria-hidden />
+              <select
+                aria-label="Status"
+                className="bg-transparent text-sm outline-none"
+                value={status}
+                onChange={(e) => changeStatus(e.target.value as QuoteStatus)}
+              >
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s[0].toUpperCase() + s.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <HelpHint text={helpText.status} />
-          <span className="inline-flex items-center gap-2 rounded-lg border px-3 py-2">
-            <span
-              className="size-2 rounded-full"
-              style={{ background: statusDot[status] }}
-              aria-hidden
-            />
-            <select
-              aria-label="Status"
-              className="bg-transparent text-sm outline-none"
-              value={status}
-              onChange={(e) => changeStatus(e.target.value as QuoteStatus)}
-            >
-              {STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s[0].toUpperCase() + s.slice(1)}
-                </option>
-              ))}
-            </select>
-          </span>
-          <Button onClick={save} disabled={saving}>
-            {saving ? "Saving…" : "Save"}
-          </Button>
-        </div>
-      </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-        {/* Left: client + line items + notes */}
-        <div className="space-y-8">
+        {/* Body */}
+        <div className="mx-auto max-w-3xl space-y-8">
           <div className="space-y-2">
             <label className={eyebrow}>
               Client <HelpHint text={helpText.client} />
@@ -216,16 +208,12 @@ export function QuoteEditor(props: QuoteEditorProps) {
             </select>
           </div>
 
+          {/* Line items */}
           <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-            <div
-              className="grid gap-3 border-b bg-muted/30 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
-              style={{ gridTemplateColumns: LINE_GRID }}
-            >
-              <span>Description</span>
-              <span className="text-center">Qty</span>
-              <span>Rate</span>
-              <span className="text-right">Total</span>
-              <span />
+            <div className="border-b bg-muted/30 px-4 py-2.5">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Line items
+              </span>
             </div>
             {lines.length === 0 ? (
               <div className="px-4 py-12 text-center text-sm text-muted-foreground">
@@ -258,37 +246,15 @@ export function QuoteEditor(props: QuoteEditorProps) {
             </div>
           </section>
 
-          <div className="space-y-2">
-            <label className={eyebrow}>
-              Notes <HelpHint text={helpText.notes} />
-            </label>
-            <Textarea
-              className="min-h-24 rounded-lg"
-              value={notes}
-              onChange={(e) => {
-                setNotes(e.target.value);
-                setDirty(true);
-              }}
-              placeholder="Internal notes (not shown to the client)…"
-            />
-          </div>
-        </div>
-
-        {/* Right: totals */}
-        <aside className="h-fit lg:sticky lg:top-8">
-          <div className="space-y-4 rounded-2xl border bg-card p-6 shadow-sm">
-            <div className="flex items-baseline justify-between">
-              <span className="text-sm text-muted-foreground">Subtotal</span>
-              <span className="text-sm tabular-nums">{formatCents(totals.subtotalCents)}</span>
-            </div>
-
-            <div className="space-y-2 border-t pt-4">
+          {/* Discount & tax */}
+          <section className="grid gap-5 rounded-2xl border bg-card p-5 shadow-sm sm:grid-cols-2">
+            <div className="space-y-2">
               <label className={eyebrow}>
                 Discount <HelpHint text={helpText.orderDiscount} />
               </label>
               <div className="flex gap-2">
                 <select
-                  className="h-9 w-28 rounded-lg border border-input bg-transparent px-2 text-sm outline-none transition-colors hover:bg-muted/40 focus-visible:border-ring"
+                  className="h-10 w-28 rounded-lg border border-input bg-transparent px-2 text-sm outline-none transition-colors hover:bg-muted/40 focus-visible:border-ring"
                   value={orderDiscountType}
                   onChange={(e) => {
                     setOrderDiscountType(e.target.value as DiscountType);
@@ -305,7 +271,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
                     type="number"
                     min={0}
                     max={100}
-                    className="h-9 flex-1"
+                    className="h-10 flex-1"
                     placeholder="0"
                     value={orderDiscountValue || ""}
                     onChange={(e) => {
@@ -316,7 +282,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
                 )}
                 {orderDiscountType === "fixed" && (
                   <MoneyInput
-                    className="h-9 w-full"
+                    className="h-10 w-full"
                     valueCents={orderDiscountValue}
                     onChangeCents={(cents) => {
                       setOrderDiscountValue(cents);
@@ -326,14 +292,13 @@ export function QuoteEditor(props: QuoteEditorProps) {
                 )}
               </div>
               {totals.discountCents > 0 && (
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Applied</span>
-                  <span className="tabular-nums">−{formatCents(totals.discountCents)}</span>
-                </div>
+                <p className="text-xs text-muted-foreground tabular-nums">
+                  −{formatCents(totals.discountCents)} applied
+                </p>
               )}
             </div>
 
-            <div className="space-y-2 border-t pt-4">
+            <div className="space-y-2">
               <label className={eyebrow}>
                 Tax rate (%) <HelpHint text={helpText.taxRate} />
               </label>
@@ -341,7 +306,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
                 type="number"
                 min={0}
                 max={100}
-                className="h-9"
+                className="h-10"
                 placeholder="0"
                 value={taxRatePercent || ""}
                 onChange={(e) => {
@@ -349,26 +314,73 @@ export function QuoteEditor(props: QuoteEditorProps) {
                   setDirty(true);
                 }}
               />
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Tax</span>
-                <span className="tabular-nums">{formatCents(totals.taxCents)}</span>
-              </div>
+              <p className="text-xs text-muted-foreground tabular-nums">
+                {formatCents(totals.taxCents)} tax
+              </p>
             </div>
+          </section>
 
-            <div className="rounded-xl bg-primary px-5 py-4 text-primary-foreground">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-70">
+          {/* Notes */}
+          <div className="space-y-2">
+            <label className={eyebrow}>
+              Notes <HelpHint text={helpText.notes} />
+            </label>
+            <Textarea
+              className="min-h-24 rounded-lg"
+              value={notes}
+              onChange={(e) => {
+                setNotes(e.target.value);
+                setDirty(true);
+              }}
+              placeholder="Internal notes (not shown to the client)…"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky bottom total bar */}
+      <div className="fixed right-0 bottom-0 left-60 z-20 border-t bg-card/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-8 py-3">
+          <div className="hidden items-center gap-5 text-sm text-muted-foreground sm:flex">
+            <span>
+              Subtotal{" "}
+              <span className="font-medium text-foreground tabular-nums">
+                {formatCents(totals.subtotalCents)}
+              </span>
+            </span>
+            {totals.discountCents > 0 && (
+              <span>
+                Disc{" "}
+                <span className="font-medium text-foreground tabular-nums">
+                  −{formatCents(totals.discountCents)}
+                </span>
+              </span>
+            )}
+            <span>
+              Tax{" "}
+              <span className="font-medium text-foreground tabular-nums">
+                {formatCents(totals.taxCents)}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center gap-5">
+            <div className="text-right leading-none">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Total
               </div>
               <div
                 data-testid="grand-total"
-                className="mt-0.5 text-3xl font-light tabular-nums transition-all"
+                className="mt-1 text-2xl font-light text-primary tabular-nums transition-all"
               >
                 {formatCents(totals.totalCents)}
               </div>
             </div>
+            <Button size="lg" onClick={save} disabled={saving}>
+              {saving ? "Saving…" : "Save"}
+            </Button>
           </div>
-        </aside>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
