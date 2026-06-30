@@ -28,8 +28,15 @@ export const lineItemSchema = z
   .refine(percentNotOver100, {
     message: "Percentage discount cannot exceed 100%",
     path: ["discountValue"],
-  });
+  })
+  .refine(
+    (li) => li.discountType !== "fixed" || li.discountValue <= Math.round(li.quantity * li.rateCents),
+    { message: "Fixed discount cannot exceed the line total", path: ["discountValue"] },
+  );
 
+// Note: an order-level fixed discount larger than the subtotal cannot be
+// validated here (the subtotal isn't known at schema time); the pricing layer
+// clamps it so the total never goes negative.
 export const quoteSchema = z
   .object({
     clientId: z.string().min(1, "A client is required"),

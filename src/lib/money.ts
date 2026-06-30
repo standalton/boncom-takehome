@@ -15,6 +15,9 @@ export function formatCents(cents: number): string {
 }
 
 export function dollarsToCents(input: string): number {
+  // Empty or non-numeric input falls back to 0 by design: this is a display
+  // helper, and authoritative input validation is the Zod schemas' job
+  // (see validation.ts). Callers must validate before persisting.
   if (!input.trim()) return 0;
   const n = Number(input);
   if (Number.isNaN(n)) return 0;

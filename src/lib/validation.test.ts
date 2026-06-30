@@ -30,6 +30,26 @@ describe("validation", () => {
     expect(lineItemSchema.safeParse({ ...validLine, description: "" }).success).toBe(false);
   });
 
+  it("rejects a fixed line discount that exceeds the line total", () => {
+    expect(
+      lineItemSchema.safeParse({
+        ...validLine,
+        discountType: "fixed",
+        discountValue: 999999, // line total is 1 x 400000 = 400000 cents
+      }).success,
+    ).toBe(false);
+  });
+
+  it("accepts a fixed line discount equal to the line total", () => {
+    expect(
+      lineItemSchema.safeParse({
+        ...validLine,
+        discountType: "fixed",
+        discountValue: 400000,
+      }).success,
+    ).toBe(true);
+  });
+
   it("rejects a quote with no client", () => {
     const r = quoteSchema.safeParse({
       clientId: "",

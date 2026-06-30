@@ -28,8 +28,19 @@ Rationale and alternatives in `DECISIONS.md`.
 
 ## How to run
 
-_To be filled in once scaffolded: install, dev, build, test commands, and the
-required environment variables (see `.env.example`)._
+```bash
+npm install          # install dependencies
+npm run dev          # dev server at http://localhost:3000
+npm run build        # production build
+npm start            # serve the production build
+npm test             # Vitest unit tests
+npm run test:watch   # Vitest in watch mode
+npm run test:e2e     # Playwright E2E tests
+npm run typecheck    # tsc --noEmit
+```
+
+Environment variables (see `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server only).
 
 ---
 
@@ -56,12 +67,14 @@ codebase grows. Format:_
 
 | If you need... | Look in... |
 | -------------- | ---------- |
-| _(e.g. shared UI components)_ | _(e.g. `src/components/`)_ |
-| _(e.g. data fetching / API calls)_ | _(e.g. `src/lib/api/`)_ |
-| _(e.g. reusable helpers/utilities)_ | _(e.g. `src/lib/utils/`)_ |
-| _(e.g. types/models)_ | _(e.g. `src/types/`)_ |
-| _(e.g. unit / integration tests)_ | _(e.g. colocated `*.test.ts` or `tests/`)_ |
-| _(e.g. E2E tests)_ | _(e.g. `e2e/`)_ |
+| Estimate math (totals, tax, discounts) | `src/lib/pricing.ts` |
+| Currency formatting / parsing | `src/lib/money.ts` |
+| Input validation rules (Zod) | `src/lib/validation.ts` |
+| shadcn/ui components | `src/components/ui/` |
+| App-specific components | `src/components/` |
+| Unit tests | colocated `src/**/*.test.ts` |
+| E2E tests | `e2e/` |
+| _(added as built: server actions, supabase clients, routes)_ | |
 
 ---
 
@@ -72,4 +85,6 @@ building something new, to avoid duplicating what already exists. Format:_
 
 | Name | Location | Purpose |
 | ---- | -------- | ------- |
-| _(populated as built)_ | | |
+| `computeTotals` | `src/lib/pricing.ts` | Pure estimate math; used by editor (live) and server (save). |
+| `formatCents` / `dollarsToCents` | `src/lib/money.ts` | Cents <-> display dollar strings. |
+| `lineItemSchema` / `quoteSchema` | `src/lib/validation.ts` | Shared Zod validation (UI + server). |
