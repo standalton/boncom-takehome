@@ -31,6 +31,8 @@ export function MoneyInput({ valueCents, onChangeCents, className, ...props }: M
         inputMode="decimal"
         className={cn("pl-6", className)}
         value={text}
+        // Select the value on focus so it can be typed over without backspacing.
+        onFocus={(e) => e.currentTarget.select()}
         onChange={(e) => {
           setText(e.target.value);
           onChangeCents(dollarsToCents(e.target.value));

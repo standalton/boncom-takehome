@@ -241,6 +241,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
                     className="h-10 flex-1"
                     placeholder="0"
                     value={orderDiscountValue || ""}
+                    onFocus={(e) => e.currentTarget.select()}
                     onChange={(e) => {
                       setOrderDiscountValue(Number(e.target.value));
                       setDirty(true);
@@ -276,6 +277,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
                 className="h-10"
                 placeholder="0"
                 value={taxRatePercent || ""}
+                onFocus={(e) => e.currentTarget.select()}
                 onChange={(e) => {
                   setTaxRatePercent(Number(e.target.value));
                   setDirty(true);

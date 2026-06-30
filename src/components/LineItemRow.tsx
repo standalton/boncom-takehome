@@ -79,6 +79,7 @@ export function LineItemRow({
             className="h-8 w-16 px-1 text-center text-sm"
             value={quantity || ""}
             placeholder="1"
+            onFocus={(e) => e.currentTarget.select()}
             onChange={(e) => onChange({ quantity: Number(e.target.value) })}
           />
         </label>
@@ -96,7 +97,7 @@ export function LineItemRow({
         {!hasDiscount ? (
           <button
             type="button"
-            className="rounded-md border border-dashed border-input px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-ring hover:text-foreground"
+            className="inline-flex h-8 items-center rounded-md border border-dashed border-input px-3 text-xs text-muted-foreground transition-colors hover:border-ring hover:text-foreground"
             onClick={() => onChange({ discountType: "percent", discountValue: 0 })}
           >
             + Discount
@@ -121,6 +122,7 @@ export function LineItemRow({
                 className="h-8 w-16 text-sm"
                 value={discountValue || ""}
                 placeholder="0"
+                onFocus={(e) => e.currentTarget.select()}
                 onChange={(e) => onChange({ discountValue: Number(e.target.value) })}
               />
             ) : (
