@@ -1,6 +1,6 @@
-# kWHOAt
+# kwik-quote
 
-**Whoa, that was quick.** A web app for building and managing client cost
+**Quick, accurate client estimates.** A web app for building and managing client cost
 estimates — custom and catalog line items, live always-correct totals, per-line
 and order discounts, tax, a status pipeline, and a full audit trail. Replaces an
 error-prone spreadsheet workflow.
