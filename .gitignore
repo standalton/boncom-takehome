@@ -33,3 +33,7 @@ pnpm-debug.log*
 # Testing / coverage
 coverage/
 .nyc_output/
+
+# Tooling scratch (browser automation, captured references)
+.playwright-mcp/
+boncom-home.jpeg

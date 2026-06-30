@@ -5,7 +5,7 @@ developers alike. The goal is a codebase a new developer can pick up and
 understand quickly.
 
 For *what lives where*, read `CONTEXT.md` (the project map). This file is the
-*rules*; that file is the *map*.
+*rules*; that file is the *map*. For visual/design tokens, read `STYLE_GUIDE.md`.
 
 ## Core principles
 
@@ -51,6 +51,12 @@ place.
 
 When you add, move, or remove a file, **update `CONTEXT.md` in the same change.**
 The map is only useful if it is never stale.
+
+## Styling
+
+If the project has a UI, follow `STYLE_GUIDE.md`, which matches Boncom's brand
+(boncom.com). Consume the design tokens defined there — do not hardcode colors,
+fonts, or spacing. Keep the look minimal and editorial per the guide.
 
 ## Naming
 

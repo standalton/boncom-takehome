@@ -33,6 +33,7 @@ _Populated when the project is scaffolded. Format:_
 | `README.md` | Human entry point: what the app is and how to run it. |
 | `CLAUDE.md` | Working rules and conventions. |
 | `CONTEXT.md` | This file — the project map / index. |
+| `STYLE_GUIDE.md` | Design tokens and visual rules (matched to Boncom brand). |
 | `DECISIONS.md` | Dated log of meaningful decisions and tradeoffs. |
 
 ---
