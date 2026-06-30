@@ -10,7 +10,7 @@ import { Plus } from "lucide-react";
 import { listQuotes } from "@/actions/quotes";
 import { formatCents } from "@/lib/money";
 import type { QuoteStatus } from "@/lib/types";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -51,10 +51,10 @@ export default async function DashboardPage({
     <div className="px-8 py-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-xl font-semibold text-primary">Estimates</h1>
-        <Button render={<Link href="/quotes/new" />} size="sm">
+        <Link href="/quotes/new" className={buttonVariants({ size: "sm" })}>
           <Plus className="size-4" />
           New estimate
-        </Button>
+        </Link>
       </div>
 
       <form className="mb-4 max-w-xs">
@@ -101,7 +101,8 @@ export default async function DashboardPage({
                     {formatCents(quote.total_cents)}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {new Date(quote.updated_at).toLocaleDateString()}
+                    {/* Deterministic UTC date so server and client render identically (no hydration mismatch). */}
+                    {new Date(quote.updated_at).toISOString().slice(0, 10)}
                   </TableCell>
                 </TableRow>
               ))}
