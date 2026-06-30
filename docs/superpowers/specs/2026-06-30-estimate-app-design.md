@@ -278,8 +278,8 @@ Realtime covers it); mobile-optimized layouts (laptop-first); email sending.
 
 ## 12. Open items and future enhancements
 
-- **App name** — to be chosen (the brief leaves naming to us); a finishing
-  decision.
+- **App name** — working name **kWHOAt** ("whoa, that was quick"); a low-stakes
+  finishing detail, trivially renamed later.
 - Future: client-facing quote history view; discount presets management UI;
   quote versioning; richer team/roles; real PDF generation via
   `@react-pdf/renderer`; email delivery.
