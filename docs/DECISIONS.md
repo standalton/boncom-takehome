@@ -38,6 +38,9 @@ decisions and the reasoning behind them:
 - **Explicit save (not autosave); Export (not Send).** *Why:* estimates are
   deliberate documents — explicit saves give clean audit entries; we have no email
   integration, so a downloadable document is the honest, useful action.
+- **Three-layer validation** (Zod rules shared across UI, Server Action, and DB
+  CHECK constraints). *Why:* rules like "discount can't exceed 100%" must hold
+  even if the UI is bypassed — defined once, enforced everywhere.
 - **Phased build, core-first.** Phase 1 fully satisfies the brief on its own;
   enhancements (duplicate, catalog, per-line discounts, pipeline, timeline, export,
   realtime) and the AI generator layer on only if the core is airtight.

@@ -90,7 +90,7 @@ workspace), except `activity_log` (insert + read only). `created_by`/
 `updated_by` are stamped server-side from the session, never trusted from the
 client.
 
-## 5. Calculation rules
+## 5. Calculation and validation rules
 
 ```
 Line gross   = quantity × rate
@@ -113,6 +113,28 @@ Locked test case: two lines ($4,000 with a 15% line discount; $1,500 full) +
 No tax-calculation library: tax is a user-entered rate, not jurisdictional
 compliance. No money library: integer-cent arithmetic is exact. `lib/pricing`
 stays dependency-free.
+
+### Validation
+
+Rules are defined once as **Zod schemas** and enforced in three layers (defense
+in depth): the **UI** (inline errors + constrained inputs for instant feedback),
+the **Server Action** (authoritative — the client is never trusted), and the
+**database** (CHECK constraints as a backstop).
+
+- **Percentage discounts (line and order): 0–100%.** No 110% discounts.
+- **Fixed discounts: ≥ 0**, and may not exceed the amount they apply to (line
+  net / subtotal).
+- **Tax rate: 0–100%**, non-negative.
+- **Quantity: > 0** (fractional allowed).
+- **Rate: ≥ 0** (free items allowed; no negatives).
+- **Description: required** (non-empty) on every line item.
+- **Client: required** before a quote can be saved.
+- **At least one line item** before a quote can leave Draft (no empty estimate
+  can be Sent).
+- **Status transitions follow the pipeline** — illegal jumps (e.g. Draft →
+  Paid) are rejected.
+- **`valid_until`** (if set) must not be in the past.
+- All money values are non-negative and bounded to sane maximums.
 
 ## 6. Data flow
 
@@ -199,7 +221,8 @@ document, not an email.
 
 - **Unit (Vitest):** `lib/pricing` exhaustively (core math, the $4,718.70 case,
   edge cases: empty = $0, discount > subtotal clamps, fractional qty, rounding,
-  zero rate, large numbers); Zod schemas; formatting helpers.
+  zero rate, large numbers); Zod validation schemas (e.g. a 110% discount is
+  rejected); formatting helpers.
 - **Integration:** Server Actions (`saveQuote` validates/recomputes/stamps/logs;
   `duplicateQuote` clones; legal status transitions; RLS rejects the
   unauthenticated).
