@@ -72,9 +72,12 @@ codebase grows. Format:_
 | Input validation rules (Zod) | `src/lib/validation.ts` |
 | shadcn/ui components | `src/components/ui/` |
 | App-specific components | `src/components/` |
+| Server actions (mutations) | `src/actions/` (auth, clients, quotes) |
+| Supabase clients + middleware | `src/lib/supabase/` |
+| Routes / pages | `src/app/(app)/` (dashboard, clients, quotes), `src/app/login/` |
+| Database schema + seed | `supabase/migrations/`, `supabase/seed.sql` |
 | Unit tests | colocated `src/**/*.test.ts` |
 | E2E tests | `e2e/` |
-| _(added as built: server actions, supabase clients, routes)_ | |
 
 ---
 
@@ -88,3 +91,8 @@ building something new, to avoid duplicating what already exists. Format:_
 | `computeTotals` | `src/lib/pricing.ts` | Pure estimate math; used by editor (live) and server (save). |
 | `formatCents` / `dollarsToCents` | `src/lib/money.ts` | Cents <-> display dollar strings. |
 | `lineItemSchema` / `quoteSchema` | `src/lib/validation.ts` | Shared Zod validation (UI + server). |
+| `HelpHint` + `helpText` | `src/components/HelpHint.tsx`, `src/lib/help-text.ts` | The one tooltip pattern + central copy. |
+| `MoneyInput` | `src/components/MoneyInput.tsx` | Currency input bound to integer cents. |
+| `QuoteEditor` | `src/components/QuoteEditor.tsx` | The core estimate editor (live totals). |
+| `Sidebar` / app shell | `src/components/app-shell/` | Authenticated nav shell. |
+| quote/client/auth actions | `src/actions/` | Server-side mutations with validation + audit. |
