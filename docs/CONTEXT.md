@@ -93,8 +93,11 @@ building something new, to avoid duplicating what already exists. Format:_
 | `lineItemSchema` / `quoteSchema` | `src/lib/validation.ts` | Shared Zod validation (UI + server). |
 | `HelpHint` + `helpText` | `src/components/HelpHint.tsx`, `src/lib/help-text.ts` | The one tooltip pattern + central copy. |
 | `MoneyInput` | `src/components/MoneyInput.tsx` | Currency input bound to integer cents. |
+| `NumberInput` | `src/components/NumberInput.tsx` | Numeric input (local text state) reporting a parsed number. |
+| `selectAllOnFocus` | `src/lib/field-helpers.ts` | Select an input's contents on focus (with mouseup guard). |
 | `ClientPicker` | `src/components/ClientPicker.tsx` | Searchable customer combobox with inline "add new". |
 | `NewClientDialog` | `src/components/NewClientDialog.tsx` | Modal to create a client without leaving the screen. |
+| `SendQuoteDialog` | `src/components/SendQuoteDialog.tsx` | Confirm-send modal shown when a quote moves to "Sent". |
 | `QuoteEditor` | `src/components/QuoteEditor.tsx` | The core quote editor (editable number, live totals). |
 | `Sidebar` / app shell | `src/components/app-shell/` | Authenticated nav shell. |
 | quote/client/auth actions | `src/actions/` | Server-side mutations with validation + audit. |

@@ -13,9 +13,10 @@ import type { QuoteStatus } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
 import { QuoteList, type QuoteListRow } from "@/components/QuoteList";
 
-const statusOrder: QuoteStatus[] = ["draft", "sent", "accepted", "paid", "declined"];
+const statusOrder: QuoteStatus[] = ["draft", "finalized", "sent", "accepted", "paid", "declined"];
 const statusStyles: Record<QuoteStatus, string> = {
   draft: "bg-muted text-muted-foreground",
+  finalized: "bg-amber-100 text-amber-800",
   sent: "bg-blue-100 text-blue-800",
   accepted: "bg-green-100 text-green-800",
   paid: "bg-emerald-100 text-emerald-800",

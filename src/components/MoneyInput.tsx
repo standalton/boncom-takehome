@@ -12,6 +12,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { dollarsToCents } from "@/lib/money";
+import { selectAllOnFocus } from "@/lib/field-helpers";
 import { cn } from "@/lib/utils";
 
 type MoneyInputProps = {
@@ -31,8 +32,7 @@ export function MoneyInput({ valueCents, onChangeCents, className, ...props }: M
         inputMode="decimal"
         className={cn("pl-6", className)}
         value={text}
-        // Select the value on focus so it can be typed over without backspacing.
-        onFocus={(e) => e.currentTarget.select()}
+        {...selectAllOnFocus}
         onChange={(e) => {
           setText(e.target.value);
           onChangeCents(dollarsToCents(e.target.value));

@@ -50,6 +50,7 @@ export const quoteSchema = z
     orderDiscountValue: z.number().min(0),
     lineItems: z.array(lineItemSchema),
     notes: z.string().optional().default(""),
+    validUntil: z.string().optional().default(""),
   })
   .refine(
     (q) => q.orderDiscountType !== "percent" || q.orderDiscountValue <= 100,

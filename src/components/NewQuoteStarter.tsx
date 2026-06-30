@@ -16,7 +16,8 @@ import { toast } from "sonner";
 import { createQuote } from "@/actions/quotes";
 import type { Client } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { ClientPicker, type ClientOption } from "@/components/ClientPicker";
+import { ClientPicker } from "@/components/ClientPicker";
+import { toClientOption, type ClientOption } from "@/lib/client-option";
 
 export function NewQuoteStarter({ clients: initialClients }: { clients: ClientOption[] }) {
   const [clients, setClients] = useState<ClientOption[]>(initialClients);
@@ -25,10 +26,7 @@ export function NewQuoteStarter({ clients: initialClients }: { clients: ClientOp
   const router = useRouter();
 
   function addClient(client: Client) {
-    setClients((prev) => [
-      ...prev,
-      { id: client.id, company: client.company, contactName: client.contact_name },
-    ]);
+    setClients((prev) => [...prev, toClientOption(client)]);
   }
 
   function create() {

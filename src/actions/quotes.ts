@@ -93,6 +93,7 @@ export async function saveQuote(id: string, input: unknown) {
       discount_type: q.orderDiscountType,
       discount_value: q.orderDiscountValue,
       notes: q.notes,
+      valid_until: q.validUntil || null,
       subtotal_cents: totals.subtotalCents,
       discount_cents: totals.discountCents,
       tax_cents: totals.taxCents,

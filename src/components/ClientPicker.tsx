@@ -15,9 +15,8 @@ import { useMemo, useState } from "react";
 import { Combobox } from "@base-ui/react/combobox";
 import { Check, ChevronsUpDown, Search, UserPlus } from "lucide-react";
 import type { Client } from "@/lib/types";
+import type { ClientOption } from "@/lib/client-option";
 import { NewClientDialog } from "@/components/NewClientDialog";
-
-export type ClientOption = { id: string; company: string; contactName: string | null };
 
 type Item = { value: string; label: string; company: string };
 

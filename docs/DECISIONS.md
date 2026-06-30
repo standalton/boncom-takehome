@@ -8,6 +8,19 @@ Format: newest first.
 
 ---
 
+## 2026-06-30 — Sending a quote is a confirmed action
+
+- **Decision:** Changing a quote's status to "Sent" opens a confirmation modal
+  (`SendQuoteDialog`) previewing the recipient (company + contact, email, phone)
+  with Send / Cancel; confirming advances the status and toasts who it went to.
+  Other status transitions apply immediately. Added a `title` column (0004) for a
+  short quote description shown under the number, and toasts now render
+  bottom-right in the light theme (they were inheriting the OS dark theme).
+- **Why:** "Sent" is the one status with real-world consequence, so it deserves a
+  deliberate step rather than a silent dropdown change; the preview makes it
+  obvious who the quote is going to. Status pills are tinted by state so the
+  pipeline reads at a glance.
+
 ## 2026-06-30 — A client is a company (contact attached)
 
 - **Decision:** Reframe a client as a **company** (the billable entity, required)

@@ -7,7 +7,7 @@
  * Notes:       Money fields are integer cents. Keep in sync with the migration.
  */
 export type DiscountType = "none" | "percent" | "fixed";
-export type QuoteStatus = "draft" | "sent" | "accepted" | "paid" | "declined";
+export type QuoteStatus = "draft" | "finalized" | "sent" | "accepted" | "paid" | "declined";
 
 export interface Client {
   id: string;
@@ -44,6 +44,7 @@ export interface LineItem {
 export interface Quote {
   id: string;
   number: string;
+  title: string | null;
   client_id: string;
   status: QuoteStatus;
   tax_rate: number;

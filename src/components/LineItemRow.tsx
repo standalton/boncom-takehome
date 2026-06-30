@@ -16,6 +16,7 @@ import type { DiscountType } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MoneyInput } from "@/components/MoneyInput";
+import { NumberInput } from "@/components/NumberInput";
 
 export type LineItemPatch = Partial<{
   description: string;
@@ -52,8 +53,8 @@ export function LineItemRow({
     <div className="group/row border-b px-4 py-3 transition-colors last:border-b-0 hover:bg-muted/20">
       <div className="flex items-center gap-2">
         <Input
-          placeholder="Description"
-          className="h-9 flex-1 text-[15px] font-medium"
+          placeholder="Add a description…"
+          className="h-9 flex-1 text-[15px] font-medium placeholder:font-normal placeholder:text-muted-foreground/60"
           value={description}
           onChange={(e) => onChange({ description: e.target.value })}
         />
@@ -71,16 +72,12 @@ export function LineItemRow({
       <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2 pl-0.5">
         <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
           Qty
-          <Input
-            type="number"
-            min={0}
-            step="0.5"
+          <NumberInput
             aria-label="Quantity"
             className="h-8 w-16 px-1 text-center text-sm"
-            value={quantity || ""}
+            value={quantity}
             placeholder="1"
-            onFocus={(e) => e.currentTarget.select()}
-            onChange={(e) => onChange({ quantity: Number(e.target.value) })}
+            onChangeNumber={(n) => onChange({ quantity: n })}
           />
         </label>
 
@@ -114,16 +111,12 @@ export function LineItemRow({
               <option value="fixed">$</option>
             </select>
             {discountType === "percent" ? (
-              <Input
-                type="number"
-                min={0}
-                max={100}
+              <NumberInput
                 aria-label="Line discount percent"
                 className="h-8 w-16 text-sm"
-                value={discountValue || ""}
+                value={discountValue}
                 placeholder="0"
-                onFocus={(e) => e.currentTarget.select()}
-                onChange={(e) => onChange({ discountValue: Number(e.target.value) })}
+                onChangeNumber={(n) => onChange({ discountValue: n })}
               />
             ) : (
               <MoneyInput

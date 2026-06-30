@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { getQuote } from "@/actions/quotes";
 import { listClients } from "@/actions/clients";
 import { QuoteEditor } from "@/components/QuoteEditor";
+import { toClientOption } from "@/lib/client-option";
 import type { Quote, LineItem } from "@/lib/types";
 
 type QuoteRow = Quote & { line_items: LineItem[] };
@@ -38,11 +39,12 @@ export default async function QuotePage({ params }: { params: Promise<{ id: stri
       number={q.number}
       status={q.status}
       clientId={q.client_id}
-      clients={clients.map((c) => ({ id: c.id, company: c.company, contactName: c.contact_name }))}
+      clients={clients.map(toClientOption)}
       taxRatePercent={Number(q.tax_rate)}
       orderDiscountType={q.discount_type}
       orderDiscountValue={Number(q.discount_value)}
       notes={q.notes ?? ""}
+      validUntil={q.valid_until ?? ""}
       lines={lines}
     />
   );

@@ -46,9 +46,9 @@ insert into clients (id, company, contact_name, email, phone, created_by) values
 ('aaaaaaa1-0000-0000-0000-000000000003','Trailhead Outdoors','Marcus Bell','marcus@trailhead.co','(503) 555-0119','11111111-1111-1111-1111-111111111111');
 
 -- Sample quotes (totals match src/lib/pricing.ts)
-insert into quotes (id, client_id, status, tax_rate, discount_type, discount_value, notes, subtotal_cents, discount_cents, tax_cents, total_cents, created_by, updated_by) values
-('bbbbbbb1-0000-0000-0000-000000000001','aaaaaaa1-0000-0000-0000-000000000001','draft',0,'none',0,'Initial scope for the Northwind rebrand.',600000,0,0,600000,'11111111-1111-1111-1111-111111111111','11111111-1111-1111-1111-111111111111'),
-('bbbbbbb1-0000-0000-0000-000000000002','aaaaaaa1-0000-0000-0000-000000000002','sent',8,'percent',5,'Q3 digital package for Lumen Health.',1620000,81000,123120,1662120,'22222222-2222-2222-2222-222222222222','22222222-2222-2222-2222-222222222222');
+insert into quotes (id, client_id, title, status, tax_rate, discount_type, discount_value, notes, subtotal_cents, discount_cents, tax_cents, total_cents, created_by, updated_by) values
+('bbbbbbb1-0000-0000-0000-000000000001','aaaaaaa1-0000-0000-0000-000000000001','Brand identity refresh','draft',0,'none',0,'Initial scope for the Northwind rebrand.',600000,0,0,600000,'11111111-1111-1111-1111-111111111111','11111111-1111-1111-1111-111111111111'),
+('bbbbbbb1-0000-0000-0000-000000000002','aaaaaaa1-0000-0000-0000-000000000002','Q3 digital marketing package','sent',8,'percent',5,'Q3 digital package for Lumen Health.',1620000,81000,123120,1662120,'22222222-2222-2222-2222-222222222222','22222222-2222-2222-2222-222222222222');
 
 insert into line_items (quote_id, description, quantity, rate_cents, discount_type, discount_value, position) values
 ('bbbbbbb1-0000-0000-0000-000000000001','Brand Strategy Workshop',1,400000,'none',0,0),

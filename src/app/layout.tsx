@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="en" className={`${openSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <TooltipProvider delay={0} closeDelay={0}>{children}</TooltipProvider>
-        <Toaster richColors position="top-right" />
+        <Toaster richColors theme="light" position="bottom-right" closeButton />
       </body>
     </html>
   );

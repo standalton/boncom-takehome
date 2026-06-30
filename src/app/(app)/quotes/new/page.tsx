@@ -6,13 +6,14 @@
  */
 import { listClients } from "@/actions/clients";
 import { NewQuoteStarter } from "@/components/NewQuoteStarter";
+import { toClientOption } from "@/lib/client-option";
 
 export default async function NewQuotePage() {
   const res = await listClients();
   const clients = res.ok ? res.data : [];
   return (
     <NewQuoteStarter
-      clients={clients.map((c) => ({ id: c.id, company: c.company, contactName: c.contact_name }))}
+      clients={clients.map(toClientOption)}
     />
   );
 }
