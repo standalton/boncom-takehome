@@ -1,7 +1,7 @@
 /**
- * quotes/page.tsx — the estimates list.
+ * quotes/page.tsx — the quotes list.
  *
- * What:        Full searchable list of estimates with a "New estimate" action.
+ * What:        Full searchable list of quotes with a "New quote" action.
  * Where used:  The /quotes route (linked from the sidebar).
  */
 import Link from "next/link";
@@ -26,7 +26,7 @@ export default async function QuotesPage({
         <h1 className="text-xl font-semibold text-primary">Quotes</h1>
         <Link href="/quotes/new" className={buttonVariants({ size: "sm" })}>
           <Plus className="size-4" />
-          New estimate
+          New quote
         </Link>
       </div>
 
@@ -36,11 +36,11 @@ export default async function QuotesPage({
 
       {!res.ok ? (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-          Could not load estimates: {res.error}
+          Could not load quotes: {res.error}
         </div>
       ) : quotes.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-          {q ? "No estimates match your search." : "No estimates yet. Create your first one."}
+          {q ? "No quotes match your search." : "No quotes yet. Create your first one."}
         </div>
       ) : (
         <QuoteList quotes={quotes} />

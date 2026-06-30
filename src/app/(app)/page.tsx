@@ -2,7 +2,7 @@
  * (app)/page.tsx — dashboard: an at-a-glance overview.
  *
  * What:        Headline metrics (count, total value, won, awaiting), a status
- *              breakdown, and the most recent estimates. The landing screen.
+ *              breakdown, and the most recent quotes. The landing screen.
  * Where used:  The "/" route inside the authenticated shell.
  */
 import Link from "next/link";
@@ -35,8 +35,8 @@ export default async function DashboardPage() {
   const recent = quotes.slice(0, 5);
 
   const cards = [
-    { label: "Total estimates", value: String(quotes.length), sub: "across all statuses" },
-    { label: "Total value", value: formatCents(sumValue(quotes)), sub: "all estimates" },
+    { label: "Total quotes", value: String(quotes.length), sub: "across all statuses" },
+    { label: "Total value", value: formatCents(sumValue(quotes)), sub: "all quotes" },
     { label: "Won", value: formatCents(sumValue(won)), sub: `${won.length} accepted or paid` },
     { label: "Awaiting reply", value: formatCents(sumValue(sent)), sub: `${sent.length} sent` },
   ];
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
         <h1 className="text-xl font-semibold text-primary">Dashboard</h1>
         <Link href="/quotes/new" className={buttonVariants({ size: "sm" })}>
           <Plus className="size-4" />
-          New estimate
+          New quote
         </Link>
       </div>
 
@@ -79,17 +79,17 @@ export default async function DashboardPage() {
         })}
       </div>
 
-      {/* Recent estimates */}
+      {/* Recent quotes */}
       <div className="mt-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">Recent estimates</h2>
+          <h2 className="text-sm font-semibold text-foreground">Recent quotes</h2>
           <Link href="/quotes" className="text-sm text-primary hover:underline">
             View all →
           </Link>
         </div>
         {recent.length === 0 ? (
           <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-            No estimates yet. Create your first one.
+            No quotes yet. Create your first one.
           </div>
         ) : (
           <QuoteList quotes={recent} />

@@ -1,5 +1,5 @@
 /**
- * quotes.ts — quote (estimate) server actions.
+ * quotes.ts — quote server actions.
  *
  * What:        Create, read, list, save, and change-status for quotes.
  * Where used:  The dashboard (list) and the quote editor (load + save).
@@ -87,6 +87,7 @@ export async function saveQuote(id: string, input: unknown) {
   const { error: upErr } = await supabase
     .from("quotes")
     .update({
+      number: q.number,
       client_id: q.clientId,
       tax_rate: q.taxRatePercent,
       discount_type: q.orderDiscountType,
@@ -100,7 +101,14 @@ export async function saveQuote(id: string, input: unknown) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
-  if (upErr) return { ok: false as const, error: upErr.message };
+  if (upErr) {
+    // A duplicate number trips the unique constraint (Postgres 23505); surface a
+    // human message instead of the raw DB error.
+    if (upErr.code === "23505") {
+      return { ok: false as const, error: `Quote number "${q.number}" is already in use.` };
+    }
+    return { ok: false as const, error: upErr.message };
+  }
 
   const { error: delErr } = await supabase.from("line_items").delete().eq("quote_id", id);
   if (delErr) return { ok: false as const, error: delErr.message };

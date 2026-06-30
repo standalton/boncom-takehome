@@ -20,7 +20,7 @@ const openSans = Open_Sans({
 
 export const metadata: Metadata = {
   title: "kwik-quote",
-  description: "Quick, accurate client estimates.",
+  description: "Quick, accurate client quotes.",
 };
 
 export default function RootLayout({

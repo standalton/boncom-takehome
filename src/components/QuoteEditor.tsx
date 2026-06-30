@@ -1,7 +1,7 @@
 /**
- * QuoteEditor.tsx — the core estimate editor.
+ * QuoteEditor.tsx — the core quote editor.
  *
- * What:        Edit a quote's client, line items (each with an optional
+ * What:        Edit a quote's number, client, line items (each with an optional
  *              discount), order-level discount, tax, notes, and status. Totals
  *              update live in a sticky bottom bar that stays pinned as you edit.
  * Where used:  The /quotes/[id] route.
@@ -18,13 +18,14 @@ import { computeTotals } from "@/lib/pricing";
 import { formatCents } from "@/lib/money";
 import { helpText } from "@/lib/help-text";
 import { saveQuote, setStatus } from "@/actions/quotes";
-import type { DiscountType, QuoteStatus } from "@/lib/types";
+import type { Client, DiscountType, QuoteStatus } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MoneyInput } from "@/components/MoneyInput";
 import { HelpHint } from "@/components/HelpHint";
 import { LineItemRow, type LineItemPatch } from "@/components/LineItemRow";
+import { ClientPicker, type ClientOption } from "@/components/ClientPicker";
 
 type EditorLine = {
   key: string;
@@ -34,8 +35,6 @@ type EditorLine = {
   discountType: DiscountType;
   discountValue: number;
 };
-
-type ClientOption = { id: string; name: string; company: string | null };
 
 export type QuoteEditorProps = {
   id: string;
@@ -61,13 +60,13 @@ const statusDot: Record<QuoteStatus, string> = {
 
 const eyebrow =
   "flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
-const fieldSelect =
-  "h-10 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none transition-colors hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40";
 
 let keyCounter = 0;
 const newKey = () => `line-${keyCounter++}`;
 
 export function QuoteEditor(props: QuoteEditorProps) {
+  const [number, setNumber] = useState(props.number);
+  const [clients, setClients] = useState<ClientOption[]>(props.clients);
   const [clientId, setClientId] = useState(props.clientId);
   const [status, setStatusState] = useState<QuoteStatus>(props.status);
   const [taxRatePercent, setTaxRatePercent] = useState(props.taxRatePercent);
@@ -110,10 +109,15 @@ export function QuoteEditor(props: QuoteEditorProps) {
     setLines((prev) => prev.filter((l) => l.key !== key));
     setDirty(true);
   }
+  function addClient(client: Client) {
+    setClients((prev) => [...prev, { id: client.id, name: client.name, company: client.company }]);
+    setDirty(true);
+  }
 
   function save() {
     startSave(async () => {
       const res = await saveQuote(props.id, {
+        number,
         clientId,
         taxRatePercent,
         orderDiscountType,
@@ -155,9 +159,17 @@ export function QuoteEditor(props: QuoteEditorProps) {
         {/* Header */}
         <div className="mx-auto mb-8 flex max-w-3xl flex-wrap items-start justify-between gap-4 border-b pb-5">
           <div>
-            <div className={eyebrow}>Estimate</div>
-            <div className="mt-1.5 flex items-center gap-3">
-              <h1 className="text-3xl font-light tracking-tight text-primary">{props.number}</h1>
+            <div className={eyebrow}>Quote</div>
+            <div className="mt-1 flex items-center gap-3">
+              <input
+                aria-label="Quote number"
+                value={number}
+                onChange={(e) => {
+                  setNumber(e.target.value);
+                  setDirty(true);
+                }}
+                className="-mx-1.5 min-w-[6ch] rounded-md border border-transparent bg-transparent px-1.5 text-3xl font-light tracking-tight text-primary outline-none transition-colors [field-sizing:content] hover:border-input hover:bg-muted/40 focus:border-ring focus:bg-background"
+              />
               {dirty && (
                 <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
                   Unsaved
@@ -191,21 +203,15 @@ export function QuoteEditor(props: QuoteEditorProps) {
             <label className={eyebrow}>
               Client <HelpHint text={helpText.client} />
             </label>
-            <select
-              className={fieldSelect}
+            <ClientPicker
+              clients={clients}
               value={clientId}
-              onChange={(e) => {
-                setClientId(e.target.value);
+              onChange={(id) => {
+                setClientId(id);
                 setDirty(true);
               }}
-            >
-              {props.clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                  {c.company ? ` — ${c.company}` : ""}
-                </option>
-              ))}
-            </select>
+              onClientAdded={addClient}
+            />
           </div>
 
           {/* Line items */}
@@ -217,7 +223,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
             </div>
             {lines.length === 0 ? (
               <div className="px-4 py-12 text-center text-sm text-muted-foreground">
-                No line items yet. Add one to start building the estimate.
+                No line items yet. Add one to start building the quote.
               </div>
             ) : (
               lines.map((l, i) => (

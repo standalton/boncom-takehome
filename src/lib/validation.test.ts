@@ -9,6 +9,16 @@ const validLine = {
   discountValue: 15,
 };
 
+const validQuote = {
+  number: "QUO-0001",
+  clientId: "c1",
+  taxRatePercent: 7,
+  orderDiscountType: "none" as const,
+  orderDiscountValue: 0,
+  lineItems: [validLine],
+  notes: "",
+};
+
 describe("validation", () => {
   it("accepts a valid line item", () => {
     expect(lineItemSchema.safeParse(validLine).success).toBe(true);
@@ -50,39 +60,29 @@ describe("validation", () => {
     ).toBe(true);
   });
 
+  it("accepts a valid quote", () => {
+    expect(quoteSchema.safeParse(validQuote).success).toBe(true);
+  });
+
+  it("rejects a quote with no number", () => {
+    expect(quoteSchema.safeParse({ ...validQuote, number: "" }).success).toBe(false);
+  });
+
   it("rejects a quote with no client", () => {
-    const r = quoteSchema.safeParse({
-      clientId: "",
-      taxRatePercent: 7,
-      orderDiscountType: "none",
-      orderDiscountValue: 0,
-      lineItems: [validLine],
-      notes: "",
-    });
-    expect(r.success).toBe(false);
+    expect(quoteSchema.safeParse({ ...validQuote, clientId: "" }).success).toBe(false);
   });
 
   it("rejects a tax rate over 100", () => {
-    const r = quoteSchema.safeParse({
-      clientId: "c1",
-      taxRatePercent: 101,
-      orderDiscountType: "none",
-      orderDiscountValue: 0,
-      lineItems: [validLine],
-      notes: "",
-    });
-    expect(r.success).toBe(false);
+    expect(quoteSchema.safeParse({ ...validQuote, taxRatePercent: 101 }).success).toBe(false);
   });
 
   it("rejects an order percentage discount over 100", () => {
-    const r = quoteSchema.safeParse({
-      clientId: "c1",
-      taxRatePercent: 7,
-      orderDiscountType: "percent",
-      orderDiscountValue: 150,
-      lineItems: [validLine],
-      notes: "",
-    });
-    expect(r.success).toBe(false);
+    expect(
+      quoteSchema.safeParse({
+        ...validQuote,
+        orderDiscountType: "percent",
+        orderDiscountValue: 150,
+      }).success,
+    ).toBe(false);
   });
 });

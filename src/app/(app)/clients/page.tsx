@@ -32,7 +32,7 @@ export default async function ClientsPage() {
         </div>
       ) : clients.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center text-sm text-muted-foreground">
-          No clients yet. Add your first client to start an estimate.
+          No clients yet. Add your first client to start a quote.
         </div>
       ) : (
         <div className="rounded-lg border">

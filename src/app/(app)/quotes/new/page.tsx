@@ -1,7 +1,7 @@
 /**
- * quotes/new/page.tsx — new estimate route.
+ * quotes/new/page.tsx — new quote route.
  *
- * What:        Loads clients and renders the new-estimate starter.
+ * What:        Loads clients and renders the new-quote starter.
  * Where used:  The /quotes/new route.
  */
 import { listClients } from "@/actions/clients";

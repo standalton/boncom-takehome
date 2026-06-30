@@ -1,5 +1,5 @@
 /**
- * QuoteList.tsx — the dashboard estimate table.
+ * QuoteList.tsx — the dashboard quote table.
  *
  * What:        Renders quotes as fully clickable rows (the whole row navigates,
  *              with a hover highlight), with status badges and totals.

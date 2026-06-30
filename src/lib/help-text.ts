@@ -6,15 +6,15 @@
  * Where used:  Passed to the HelpHint component throughout the UI.
  */
 export const helpText = {
-  client: "Who this estimate is for. Pick an existing client or add a new one.",
+  client: "Who this quote is for. Pick an existing client or add a new one.",
   status:
-    "Where this estimate sits in your pipeline: Draft, Sent, Accepted, Paid, or Declined.",
+    "Where this quote sits in your pipeline: Draft, Sent, Accepted, Paid, or Declined.",
   lineItem: "A single product or service: a description, a quantity, and a rate.",
   lineDiscount: "An optional discount applied to just this line item.",
-  orderDiscount: "A discount applied to the whole estimate, after line items.",
+  orderDiscount: "A discount applied to the whole quote, after line items.",
   taxRate: "The tax percentage, applied to the subtotal after discounts.",
-  validUntil: "The date this estimate expires.",
-  notes: "Internal notes about this estimate. Not shown to the client.",
+  validUntil: "The date this quote expires.",
+  notes: "Internal notes about this quote. Not shown to the client.",
 } as const;
 
 export type HelpKey = keyof typeof helpText;

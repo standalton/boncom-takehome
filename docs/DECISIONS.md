@@ -8,6 +8,26 @@ Format: newest first.
 
 ---
 
+## 2026-06-30 — Standardize on "quote"; editable quote number
+
+- **Decision:** Use "quote" consistently in the UI (the product is *kwik-quote*)
+  and switch the auto-generated number prefix from `EST-` to `QUO-` via migration
+  `0002`, migrating existing rows. The quote number is now user-editable in the
+  editor; the DB `unique` constraint is the backstop and a duplicate surfaces a
+  friendly error (no silent failure).
+- **Why:** The earlier copy mixed "estimate" and "quote", and the `EST-` prefix
+  contradicted the product name. Agencies often want to set their own quote
+  references, so the number is editable rather than fixed.
+
+## 2026-06-30 — Searchable customer picker with inline create
+
+- **Decision:** Replace the native client `<select>` with a Base UI Combobox
+  (`ClientPicker`) that filters as you type and has a pinned "Add new customer"
+  action opening `NewClientDialog`; the created client is selected immediately.
+- **Why:** Selecting a client is the first step of every quote; a searchable
+  picker scales past a handful of clients, and inline creation removes a
+  context-switch to the Clients page mid-quote.
+
 ## 2026-06-30 — Estimate app design locked
 
 Full design: `docs/superpowers/specs/2026-06-30-estimate-app-design.md`. Headline

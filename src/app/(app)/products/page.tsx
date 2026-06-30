@@ -33,7 +33,7 @@ export default async function ProductsPage() {
         </div>
       ) : products.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-          No products yet. Add the services you offer to reuse them in estimates.
+          No products yet. Add the services you offer to reuse them in quotes.
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border">
