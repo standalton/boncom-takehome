@@ -33,3 +33,7 @@ pnpm-debug.log*
 # Testing / coverage
 coverage/
 .nyc_output/
+
+# Next.js TypeScript
+next-env.d.ts
+*.tsbuildinfo
