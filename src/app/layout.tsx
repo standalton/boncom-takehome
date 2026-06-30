@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${openSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <TooltipProvider delay={200}>{children}</TooltipProvider>
+        <TooltipProvider delay={0} closeDelay={0}>{children}</TooltipProvider>
         <Toaster richColors position="top-right" />
       </body>
     </html>

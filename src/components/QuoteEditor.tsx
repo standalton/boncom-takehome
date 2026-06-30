@@ -1,10 +1,9 @@
 /**
  * QuoteEditor.tsx — the core estimate editor.
  *
- * What:        Edit a quote's client, line items, discount, tax, notes, and
- *              status, with totals updating live as you type. Save persists via
- *              the saveQuote server action (which re-validates and recomputes
- *              totals authoritatively).
+ * What:        Edit a quote's client, line items (each with an optional
+ *              discount), order-level discount, tax, notes, and status, with
+ *              totals updating live as you type. Save persists via saveQuote.
  * Where used:  The /quotes/[id] route.
  * Notes:       Totals come from the SAME lib/pricing.computeTotals the server
  *              uses, so the preview and the saved figure cannot diverge.
@@ -13,7 +12,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { computeTotals } from "@/lib/pricing";
 import { formatCents } from "@/lib/money";
 import { helpText } from "@/lib/help-text";
@@ -24,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MoneyInput } from "@/components/MoneyInput";
 import { HelpHint } from "@/components/HelpHint";
+import { LineItemRow, type LineItemPatch } from "@/components/LineItemRow";
 
 type EditorLine = {
   key: string;
@@ -51,7 +51,7 @@ export type QuoteEditorProps = {
 
 const STATUSES: QuoteStatus[] = ["draft", "sent", "accepted", "paid", "declined"];
 const selectClass =
-  "h-9 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
+  "h-9 rounded-md border border-input bg-transparent px-2 text-sm outline-none transition-colors hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 let keyCounter = 0;
 const newKey = () => `line-${keyCounter++}`;
@@ -84,7 +84,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
     [lines, orderDiscountType, orderDiscountValue, taxRatePercent],
   );
 
-  function updateLine(key: string, patch: Partial<EditorLine>) {
+  function updateLine(key: string, patch: LineItemPatch) {
     setLines((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)));
     setDirty(true);
   }
@@ -143,7 +143,11 @@ export function QuoteEditor(props: QuoteEditorProps) {
       <div className="mb-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold text-primary">{props.number}</h1>
-          {dirty && <span className="text-xs text-muted-foreground">Unsaved changes</span>}
+          {dirty && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">
+              Unsaved changes
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -166,7 +170,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
         {/* Left: client + line items */}
         <div className="space-y-6">
           <div className="space-y-2">
@@ -190,52 +194,31 @@ export function QuoteEditor(props: QuoteEditorProps) {
             </select>
           </div>
 
-          <div className="rounded-lg border">
-            <div className="grid grid-cols-[1fr_80px_120px_110px_40px] gap-2 border-b bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
+          <div className="overflow-hidden rounded-xl border">
+            <div className="grid grid-cols-[1fr_64px_112px_96px_28px] gap-3 border-b bg-muted/40 px-4 py-2.5 text-xs font-medium text-muted-foreground">
               <span>Description</span>
-              <span>Qty</span>
+              <span className="text-center">Qty</span>
               <span>Rate</span>
               <span className="text-right">Total</span>
               <span />
             </div>
             {lines.length === 0 ? (
-              <div className="px-3 py-8 text-center text-sm text-muted-foreground">
+              <div className="px-4 py-10 text-center text-sm text-muted-foreground">
                 No line items yet. Add one to start building the estimate.
               </div>
             ) : (
               lines.map((l, i) => (
-                <div
+                <LineItemRow
                   key={l.key}
-                  className="grid grid-cols-[1fr_80px_120px_110px_40px] items-center gap-2 border-b px-3 py-2 last:border-b-0"
-                >
-                  <Input
-                    placeholder="Description"
-                    value={l.description}
-                    onChange={(e) => updateLine(l.key, { description: e.target.value })}
-                  />
-                  <Input
-                    type="number"
-                    min={0}
-                    step="0.5"
-                    value={l.quantity}
-                    onChange={(e) => updateLine(l.key, { quantity: Number(e.target.value) })}
-                  />
-                  <MoneyInput
-                    valueCents={l.rateCents}
-                    onChangeCents={(cents) => updateLine(l.key, { rateCents: cents })}
-                  />
-                  <span className="text-right text-sm tabular-nums">
-                    {formatCents(totals.lineNetsCents[i] ?? 0)}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Remove line"
-                    onClick={() => removeLine(l.key)}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
+                  description={l.description}
+                  quantity={l.quantity}
+                  rateCents={l.rateCents}
+                  discountType={l.discountType}
+                  discountValue={l.discountValue}
+                  lineNetCents={totals.lineNetsCents[i] ?? 0}
+                  onChange={(patch) => updateLine(l.key, patch)}
+                  onRemove={() => removeLine(l.key)}
+                />
               ))
             )}
             <div className="p-3">
@@ -262,19 +245,19 @@ export function QuoteEditor(props: QuoteEditorProps) {
         </div>
 
         {/* Right: totals */}
-        <div className="h-fit space-y-4 rounded-lg border bg-card p-4">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Subtotal</span>
+        <div className="h-fit space-y-5 rounded-xl border bg-card p-5 shadow-sm">
+          <div className="flex items-baseline justify-between">
+            <span className="text-sm text-muted-foreground">Subtotal</span>
             <span className="tabular-nums">{formatCents(totals.subtotalCents)}</span>
           </div>
 
           <div className="space-y-2">
-            <span className="flex items-center gap-1 text-sm">
+            <span className="flex items-center gap-1 text-sm font-medium">
               Discount <HelpHint text={helpText.orderDiscount} />
             </span>
             <div className="flex gap-2">
               <select
-                className={selectClass}
+                className={`${selectClass} w-24`}
                 value={orderDiscountType}
                 onChange={(e) => {
                   setOrderDiscountType(e.target.value as DiscountType);
@@ -283,15 +266,17 @@ export function QuoteEditor(props: QuoteEditorProps) {
                 }}
               >
                 <option value="none">None</option>
-                <option value="percent">%</option>
-                <option value="fixed">$</option>
+                <option value="percent">Percent</option>
+                <option value="fixed">Amount</option>
               </select>
               {orderDiscountType === "percent" && (
                 <Input
                   type="number"
                   min={0}
                   max={100}
-                  value={orderDiscountValue}
+                  className="flex-1"
+                  placeholder="0"
+                  value={orderDiscountValue || ""}
                   onChange={(e) => {
                     setOrderDiscountValue(Number(e.target.value));
                     setDirty(true);
@@ -300,6 +285,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
               )}
               {orderDiscountType === "fixed" && (
                 <MoneyInput
+                  className="w-full"
                   valueCents={orderDiscountValue}
                   onChangeCents={(cents) => {
                     setOrderDiscountValue(cents);
@@ -317,14 +303,15 @@ export function QuoteEditor(props: QuoteEditorProps) {
           </div>
 
           <div className="space-y-2">
-            <span className="flex items-center gap-1 text-sm">
+            <span className="flex items-center gap-1 text-sm font-medium">
               Tax rate (%) <HelpHint text={helpText.taxRate} />
             </span>
             <Input
               type="number"
               min={0}
               max={100}
-              value={taxRatePercent}
+              placeholder="0"
+              value={taxRatePercent || ""}
               onChange={(e) => {
                 setTaxRatePercent(Number(e.target.value));
                 setDirty(true);
@@ -336,9 +323,12 @@ export function QuoteEditor(props: QuoteEditorProps) {
             </div>
           </div>
 
-          <div className="flex justify-between border-t pt-3 text-base font-semibold text-primary">
-            <span>Total</span>
-            <span data-testid="grand-total" className="tabular-nums">
+          <div className="flex items-baseline justify-between border-t pt-4">
+            <span className="text-base font-semibold text-primary">Total</span>
+            <span
+              data-testid="grand-total"
+              className="text-lg font-semibold text-primary tabular-nums"
+            >
               {formatCents(totals.totalCents)}
             </span>
           </div>
