@@ -17,7 +17,7 @@ import { Plus } from "lucide-react";
 import { computeTotals } from "@/lib/pricing";
 import { formatCents } from "@/lib/money";
 import { helpText } from "@/lib/help-text";
-import { saveQuote, setStatus } from "@/actions/quotes";
+import { saveQuote } from "@/actions/quotes";
 import type { Client, DiscountType, QuoteStatus } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,15 +49,6 @@ export type QuoteEditorProps = {
   lines: Omit<EditorLine, "key">[];
 };
 
-const STATUSES: QuoteStatus[] = ["draft", "sent", "accepted", "paid", "declined"];
-const statusDot: Record<QuoteStatus, string> = {
-  draft: "#9ca3af",
-  sent: "#3b82f6",
-  accepted: "#22c55e",
-  paid: "#10b981",
-  declined: "#ef4444",
-};
-
 const eyebrow =
   "flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
 
@@ -68,7 +59,6 @@ export function QuoteEditor(props: QuoteEditorProps) {
   const [number, setNumber] = useState(props.number);
   const [clients, setClients] = useState<ClientOption[]>(props.clients);
   const [clientId, setClientId] = useState(props.clientId);
-  const [status, setStatusState] = useState<QuoteStatus>(props.status);
   const [taxRatePercent, setTaxRatePercent] = useState(props.taxRatePercent);
   const [orderDiscountType, setOrderDiscountType] = useState<DiscountType>(props.orderDiscountType);
   const [orderDiscountValue, setOrderDiscountValue] = useState(props.orderDiscountValue);
@@ -76,7 +66,6 @@ export function QuoteEditor(props: QuoteEditorProps) {
   const [lines, setLines] = useState<EditorLine[]>(props.lines.map((l) => ({ ...l, key: newKey() })));
   const [dirty, setDirty] = useState(false);
   const [saving, startSave] = useTransition();
-  const [, startStatus] = useTransition();
 
   const totals = useMemo(
     () =>
@@ -143,19 +132,6 @@ export function QuoteEditor(props: QuoteEditorProps) {
     });
   }
 
-  function changeStatus(next: QuoteStatus) {
-    const previous = status;
-    setStatusState(next);
-    startStatus(async () => {
-      const res = await setStatus(props.id, next);
-      if (res.ok) toast.success(`Marked ${next}`);
-      else {
-        toast.error(res.error);
-        setStatusState(previous);
-      }
-    });
-  }
-
   return (
     <>
       <div className="px-8 pt-8 pb-32">
@@ -171,7 +147,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
                   setNumber(e.target.value);
                   setDirty(true);
                 }}
-                className="-mx-1.5 min-w-[6ch] rounded-md border border-transparent bg-transparent px-1.5 text-3xl font-light tracking-tight text-primary outline-none transition-colors [field-sizing:content] hover:border-input hover:bg-muted/40 focus:border-ring focus:bg-background"
+                className="min-w-[6ch] rounded-lg border border-input bg-background px-2.5 py-1 text-3xl font-light tracking-tight text-primary outline-none transition-colors [field-sizing:content] hover:bg-muted/30 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
               />
               {dirty && (
                 <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
@@ -179,24 +155,6 @@ export function QuoteEditor(props: QuoteEditorProps) {
                 </span>
               )}
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <HelpHint text={helpText.status} />
-            <span className="inline-flex items-center gap-2 rounded-lg border px-3 py-2">
-              <span className="size-2 rounded-full" style={{ background: statusDot[status] }} aria-hidden />
-              <select
-                aria-label="Status"
-                className="bg-transparent text-sm outline-none"
-                value={status}
-                onChange={(e) => changeStatus(e.target.value as QuoteStatus)}
-              >
-                {STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s[0].toUpperCase() + s.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </span>
           </div>
         </div>
 
