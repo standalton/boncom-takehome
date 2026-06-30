@@ -19,7 +19,7 @@ import { NewClientDialog } from "@/components/NewClientDialog";
 
 export type ClientOption = { id: string; company: string; contactName: string | null };
 
-type Item = { value: string; label: string; company: string; contact: string | null };
+type Item = { value: string; label: string; company: string };
 
 type Props = {
   clients: ClientOption[];
@@ -36,7 +36,6 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
         // label drives filtering, so include the contact name as well as company.
         label: c.contactName ? `${c.company} ${c.contactName}` : c.company,
         company: c.company,
-        contact: c.contactName,
       })),
     [clients],
   );
@@ -55,7 +54,7 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
         }}
         onInputValueChange={(text) => setQuery(text)}
       >
-        <Combobox.Trigger className="flex h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-3 text-left text-sm outline-none transition-colors hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 data-popup-open:border-ring">
+        <Combobox.Trigger className="group/trigger flex h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-3 text-left text-sm outline-none transition-[background-color,border-color,box-shadow] duration-150 hover:border-ring/60 hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 data-popup-open:border-ring data-popup-open:ring-[3px] data-popup-open:ring-ring/30">
           <Combobox.Value>
             {(val: Item | null) =>
               val ? (
@@ -65,7 +64,7 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
               )
             }
           </Combobox.Value>
-          <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
+          <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground transition-colors group-hover/trigger:text-foreground" />
         </Combobox.Trigger>
 
         <Combobox.Portal>
@@ -91,16 +90,9 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
                     <Combobox.Item
                       key={item.value}
                       value={item}
-                      className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm outline-none select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                      className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm outline-none transition-colors select-none hover:bg-accent data-highlighted:bg-accent data-highlighted:text-accent-foreground"
                     >
-                      <span className="min-w-0">
-                        <span className="line-clamp-1 font-medium">{item.company}</span>
-                        {item.contact && (
-                          <span className="line-clamp-1 text-xs text-muted-foreground">
-                            {item.contact}
-                          </span>
-                        )}
-                      </span>
+                      <span className="line-clamp-1">{item.company}</span>
                       <Combobox.ItemIndicator>
                         <Check className="size-4 shrink-0 text-primary" />
                       </Combobox.ItemIndicator>
