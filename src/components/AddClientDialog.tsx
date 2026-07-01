@@ -25,7 +25,7 @@ export function AddClientDialog() {
         <Plus className="size-4" />
         Add client
       </Button>
-      <NewClientDialog open={open} onOpenChange={setOpen} onCreated={() => router.refresh()} />
+      <NewClientDialog open={open} onOpenChange={setOpen} onSaved={() => router.refresh()} />
     </>
   );
 }

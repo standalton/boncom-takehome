@@ -1,23 +1,27 @@
 /**
  * clients/page.tsx — clients list.
  *
- * What:        Lists all clients (shared workspace) with an "Add client" action.
+ * What:        Lists clients (searchable by company, contact, email, or the
+ *              number of a quote they own) with an "Add client" action.
  * Where used:  The /clients route.
  */
 import { listClients } from "@/actions/clients";
+import { parsePage } from "@/lib/pagination";
 import { AddClientDialog } from "@/components/AddClientDialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { ClientList } from "@/components/ClientList";
+import { Pagination } from "@/components/Pagination";
+import { Input } from "@/components/ui/input";
 
-export default async function ClientsPage() {
-  const res = await listClients();
+export default async function ClientsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const { q, page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
+  const res = await listClients(q, page);
   const clients = res.ok ? res.data : [];
+  const total = res.ok ? res.count : 0;
 
   return (
     <div className="px-8 py-6">
@@ -26,37 +30,27 @@ export default async function ClientsPage() {
         <AddClientDialog />
       </div>
 
+      <form className="mb-4 max-w-md">
+        <Input
+          name="q"
+          defaultValue={q ?? ""}
+          placeholder="Search by company, contact, email, or quote #…"
+        />
+      </form>
+
       {!res.ok ? (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
           Could not load clients: {res.error}
         </div>
       ) : clients.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center text-sm text-muted-foreground">
-          No clients yet. Add your first client to start a quote.
+          {q ? "No clients match your search." : "No clients yet. Add your first client to start a quote."}
         </div>
       ) : (
-        <div className="rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Company</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {clients.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.company}</TableCell>
-                  <TableCell>{c.contact_name ?? "—"}</TableCell>
-                  <TableCell>{c.email ?? "—"}</TableCell>
-                  <TableCell>{c.phone ?? "—"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <>
+          <ClientList clients={clients} />
+          <Pagination page={page} total={total} />
+        </>
       )}
     </div>
   );

@@ -119,7 +119,8 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
         open={addOpen}
         onOpenChange={setAddOpen}
         initialCompany={query.trim()}
-        onCreated={(client) => {
+        description="Create a new customer and assign them to this quote."
+        onSaved={(client) => {
           onClientAdded(client);
           onChange(client.id);
         }}

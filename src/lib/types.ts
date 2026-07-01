@@ -27,6 +27,8 @@ export interface Product {
   default_rate_cents: number;
   unit: string | null;
   active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface LineItem {

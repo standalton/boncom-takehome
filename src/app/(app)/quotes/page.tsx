@@ -7,18 +7,22 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { listQuotes } from "@/actions/quote-queries";
+import { parsePage } from "@/lib/pagination";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/Pagination";
 import { QuoteList, type QuoteListRow } from "@/components/QuoteList";
 
 export default async function QuotesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  const { q } = await searchParams;
-  const res = await listQuotes(q);
+  const { q, page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
+  const res = await listQuotes(q, page);
   const quotes = (res.ok ? res.data : []) as unknown as QuoteListRow[];
+  const total = res.ok ? res.count : 0;
 
   return (
     <div className="px-8 py-6">
@@ -43,7 +47,10 @@ export default async function QuotesPage({
           {q ? "No quotes match your search." : "No quotes yet. Create your first one."}
         </div>
       ) : (
-        <QuoteList quotes={quotes} />
+        <>
+          <QuoteList quotes={quotes} />
+          <Pagination page={page} total={total} />
+        </>
       )}
     </div>
   );

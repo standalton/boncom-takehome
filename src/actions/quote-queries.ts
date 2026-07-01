@@ -10,19 +10,25 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { toActivityEntries } from "@/lib/activity";
+import { pageRange } from "@/lib/pagination";
 
-export async function listQuotes(search?: string) {
+export async function listQuotes(search?: string, page?: number) {
   const supabase = await createClient();
   let query = supabase
     .from("quotes")
-    .select("*, clients(company, contact_name)")
+    .select("*, clients(company, contact_name)", { count: "exact" })
     .order("updated_at", { ascending: false });
   if (search && search.trim()) {
     query = query.ilike("number", `%${search.trim()}%`);
   }
-  const { data, error } = await query;
+  // A page number means "paginate"; its absence (e.g. the dashboard) means "all".
+  if (page !== undefined) {
+    const { from, to } = pageRange(page);
+    query = query.range(from, to);
+  }
+  const { data, error, count } = await query;
   if (error) return { ok: false as const, error: error.message };
-  return { ok: true as const, data: data ?? [] };
+  return { ok: true as const, data: data ?? [], count: count ?? (data?.length ?? 0) };
 }
 
 export async function listQuotesByClient(clientId: string) {
