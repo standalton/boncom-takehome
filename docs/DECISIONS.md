@@ -218,3 +218,20 @@ decisions and the reasoning behind them:
 - **Note:** A pure `lib/list-params.ts` validates the untrusted sort param against
   a per-table allow-list; status/unit filters reuse the existing closed sets
   (`QUOTE_STATUSES`, `isProductUnit`).
+
+## 2026-06-30 — Quote editor uses live, per-field inline validation
+
+- **Decision:** The quote editor validates every field in real time using the
+  existing `quoteSchema`, surfaced through a pure `lib/quote-errors.ts` mapper.
+  Timing follows "reward early, punish late": a field shows its error on blur,
+  then re-validates live as it is corrected. Save/Finalize stay **enabled** —
+  clicking with outstanding errors reveals all invalid fields (red border +
+  inline message) and scrolls to the first, rather than disabling the button.
+- **Why:** Errors previously only surfaced as a toast on save. Driving the UI
+  from the same Zod schema the server uses means the two can't diverge (no
+  duplicated rules). Keeping Save enabled with reveal-on-click is the familiar
+  big-company pattern (Stripe/GitHub/GOV.UK) and is more accessible than a
+  disabled button with a tooltip, which can't reliably receive focus/hover.
+- **Note:** The one rule the schema can't see (order discount vs. subtotal) is
+  folded in from `pricing.ts`. The server still re-validates authoritatively on
+  save — the inline layer is UX, not the security boundary.

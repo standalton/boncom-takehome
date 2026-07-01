@@ -26,9 +26,12 @@ type Props = {
   taxRatePercent: number;
   discountCents: number;
   taxCents: number;
-  error?: string | null;
+  error?: string;
+  taxError?: string;
   onDiscountChange: (type: DiscountType, value: number) => void;
+  onDiscountBlur?: () => void;
   onTaxChange: (value: number) => void;
+  onTaxBlur?: () => void;
 };
 
 export function AdjustmentsCard({
@@ -38,8 +41,11 @@ export function AdjustmentsCard({
   discountCents,
   taxCents,
   error,
+  taxError,
   onDiscountChange,
+  onDiscountBlur,
   onTaxChange,
+  onTaxBlur,
 }: Props) {
   return (
     <section className="grid gap-5 rounded-2xl border bg-card p-5 shadow-sm sm:grid-cols-2">
@@ -64,7 +70,9 @@ export function AdjustmentsCard({
               className="h-10 flex-1"
               placeholder="0"
               value={discountValue}
+              error={error}
               onChangeNumber={(n) => onDiscountChange("percent", n)}
+              onBlur={onDiscountBlur}
             />
           )}
           {discountType === "fixed" && (
@@ -72,7 +80,9 @@ export function AdjustmentsCard({
               aria-label="Discount amount"
               className="h-10 w-full"
               valueCents={discountValue}
+              error={error}
               onChangeCents={(cents) => onDiscountChange("fixed", cents)}
+              onBlur={onDiscountBlur}
             />
           )}
         </div>
@@ -96,9 +106,15 @@ export function AdjustmentsCard({
           className="h-10"
           placeholder="0"
           value={taxRatePercent}
+          error={taxError}
           onChangeNumber={onTaxChange}
+          onBlur={onTaxBlur}
         />
-        <p className="text-xs tabular-nums text-muted-foreground">{formatCents(taxCents)} tax</p>
+        {taxError ? (
+          <p className="text-xs font-medium text-destructive">{taxError}</p>
+        ) : (
+          <p className="text-xs tabular-nums text-muted-foreground">{formatCents(taxCents)} tax</p>
+        )}
       </div>
     </section>
   );

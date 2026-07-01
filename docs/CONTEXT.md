@@ -112,6 +112,7 @@ building something new, to avoid duplicating what already exists. Format:_
 | `FilterSelect` | `src/components/FilterSelect.tsx` | URL-driven facet dropdown (quotes: status, products: unit); "All" clears the param. |
 | `lineItemSchema` / `quoteSchema` | `src/lib/validation.ts` | Shared Zod validation (UI + server). |
 | `collectQuoteErrors` / `hasAnyError` | `src/lib/quote-errors.ts` | Maps the quote schemas to per-field UI errors; drives the editor's live inline validation. |
+| `useQuoteValidation` | `src/lib/use-quote-validation.ts` | Editor validation state: blur-then-live `touched` tracking + reveal-on-save (scroll to first invalid field). |
 | `HelpHint` + `helpText` | `src/components/HelpHint.tsx`, `src/lib/help-text.ts` | The one tooltip pattern + central copy. |
 | `MoneyInput` | `src/components/MoneyInput.tsx` | Currency input bound to integer cents. |
 | `NumberInput` | `src/components/NumberInput.tsx` | Numeric input (local text state) reporting a parsed number. |

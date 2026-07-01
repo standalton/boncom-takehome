@@ -20,6 +20,7 @@ import { AdjustmentsCard } from "@/components/AdjustmentsCard";
 import { ClientPicker } from "@/components/ClientPicker";
 import type { ClientOption } from "@/lib/client-option";
 import type { ProductOption } from "@/lib/product-option";
+import type { LineFieldErrors } from "@/lib/quote-errors";
 
 const eyebrow =
   "flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
@@ -37,7 +38,9 @@ export type EditorLine = {
 type Props = {
   clients: ClientOption[];
   clientId: string;
+  clientError?: string;
   onClientChange: (id: string) => void;
+  onClientBlur: () => void;
   onClientAdded: (client: Client) => void;
   products: ProductOption[];
   lines: EditorLine[];
@@ -45,14 +48,20 @@ type Props = {
   onUpdateLine: (key: string, patch: LineItemPatch) => void;
   onAddLine: () => void;
   onRemoveLine: (key: string) => void;
+  // Visible (post-blur) errors for a line, and a blur reporter, from the editor.
+  lineErrors: (key: string) => LineFieldErrors;
+  onLineBlur: (key: string, field: keyof LineFieldErrors) => void;
   discountType: DiscountType;
   discountValue: number;
   taxRatePercent: number;
   discountCents: number;
   taxCents: number;
-  discountError?: string | null;
+  discountError?: string;
+  taxError?: string;
   onDiscountChange: (type: DiscountType, value: number) => void;
+  onDiscountBlur: () => void;
   onTaxChange: (value: number) => void;
+  onTaxBlur: () => void;
   notes: string;
   onNotesChange: (value: string) => void;
 };
@@ -60,7 +69,9 @@ type Props = {
 export function QuoteEditorForm({
   clients,
   clientId,
+  clientError,
   onClientChange,
+  onClientBlur,
   onClientAdded,
   products,
   lines,
@@ -68,14 +79,19 @@ export function QuoteEditorForm({
   onUpdateLine,
   onAddLine,
   onRemoveLine,
+  lineErrors,
+  onLineBlur,
   discountType,
   discountValue,
   taxRatePercent,
   discountCents,
   taxCents,
   discountError,
+  taxError,
   onDiscountChange,
+  onDiscountBlur,
   onTaxChange,
+  onTaxBlur,
   notes,
   onNotesChange,
 }: Props) {
@@ -88,7 +104,9 @@ export function QuoteEditorForm({
         <ClientPicker
           clients={clients}
           value={clientId}
+          error={clientError}
           onChange={onClientChange}
+          onBlur={onClientBlur}
           onClientAdded={onClientAdded}
         />
       </div>
@@ -114,7 +132,9 @@ export function QuoteEditorForm({
               discountValue={l.discountValue}
               lineNetCents={lineNets[i] ?? 0}
               products={products}
+              errors={lineErrors(l.key)}
               onChange={(patch) => onUpdateLine(l.key, patch)}
+              onFieldBlur={(field) => onLineBlur(l.key, field)}
               onRemove={() => onRemoveLine(l.key)}
             />
           ))
@@ -138,8 +158,11 @@ export function QuoteEditorForm({
         discountCents={discountCents}
         taxCents={taxCents}
         error={discountError}
+        taxError={taxError}
         onDiscountChange={onDiscountChange}
+        onDiscountBlur={onDiscountBlur}
         onTaxChange={onTaxChange}
+        onTaxBlur={onTaxBlur}
       />
 
       <div className="space-y-2">

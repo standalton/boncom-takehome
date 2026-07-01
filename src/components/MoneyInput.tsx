@@ -19,9 +19,12 @@ type MoneyInputProps = {
   valueCents: number;
   onChangeCents: (cents: number) => void;
   className?: string;
+  // When set, the field renders in its invalid (red) state. The message text is
+  // rendered by the parent, next to the field.
+  error?: string;
 } & Omit<React.ComponentProps<typeof Input>, "value" | "onChange" | "type">;
 
-export function MoneyInput({ valueCents, onChangeCents, className, ...props }: MoneyInputProps) {
+export function MoneyInput({ valueCents, onChangeCents, className, error, ...props }: MoneyInputProps) {
   const [text, setText] = useState(valueCents ? (valueCents / 100).toString() : "");
   return (
     <div className="relative">
@@ -32,6 +35,7 @@ export function MoneyInput({ valueCents, onChangeCents, className, ...props }: M
         inputMode="decimal"
         className={cn("pl-6", className)}
         value={text}
+        aria-invalid={error ? true : undefined}
         {...selectAllOnFocus}
         onChange={(e) => {
           setText(e.target.value);

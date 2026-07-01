@@ -3,8 +3,9 @@
  *
  * What:        Create, save, change-status, duplicate, and delete quotes.
  *              (Read-only queries live in actions/quote-queries.ts.)
- * Where used:  The quote editor (save / status / duplicate / delete) and the
- *              new-quote starter.
+ * Where used:  The quote editor — for both an existing quote (save / status /
+ *              duplicate / delete) and a brand-new one (createQuote on first
+ *              save/finalize).
  * Notes:       saveQuote re-validates with the shared Zod schema and RECOMPUTES
  *              totals server-side via lib/pricing (the client total is never
  *              trusted), stamps the editor, and appends an audit entry. Line
@@ -22,26 +23,15 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { computeTotals, orderDiscountExceedsSubtotal } from "@/lib/pricing";
 import { quoteSchema } from "@/lib/validation";
+import { finalizeBlockedReason } from "@/lib/quote-errors";
 import { statusesThatCanBecome } from "@/lib/quote-status";
 import { recordActivity, snapshotChanges, type PrevQuoteRow } from "@/lib/quote-audit";
 import type { QuoteStatus } from "@/lib/types";
 
-export async function createQuote(clientId: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from("quotes")
-    .insert({ client_id: clientId, created_by: user?.id, updated_by: user?.id })
-    .select("id")
-    .single();
-  if (error) return { ok: false as const, error: error.message };
-  await recordActivity(supabase, { quote_id: data.id, user_id: user?.id, action: "created", detail: {} });
-  return { ok: true as const, id: data.id as string };
-}
-
-export async function saveQuote(id: string, input: unknown) {
+// Validate untrusted quote input and recompute its totals server-side (the
+// client's figures are never trusted). Shared by createQuote and saveQuote so
+// the two paths can't validate or price a quote differently.
+function priceQuote(input: unknown) {
   const parsed = quoteSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false as const, error: parsed.error.issues[0].message };
@@ -66,6 +56,70 @@ export async function saveQuote(id: string, input: unknown) {
   if (orderDiscountExceedsSubtotal(q.orderDiscountType, q.orderDiscountValue, totals.subtotalCents)) {
     return { ok: false as const, error: "The order discount can't exceed the subtotal." };
   }
+
+  return { ok: true as const, q, totals };
+}
+
+// Create a fresh draft quote from the editor's full input. The row is created
+// only when the user first saves (or finalizes) a new quote — visiting
+// /quotes/new alone writes nothing, so abandoned starts leave no orphan drafts.
+// The quote number is auto-assigned by the DB default on insert.
+export async function createQuote(input: unknown) {
+  const priced = priceQuote(input);
+  if (!priced.ok) return { ok: false as const, error: priced.error };
+  const { q, totals } = priced;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data, error } = await supabase
+    .from("quotes")
+    .insert({
+      client_id: q.clientId,
+      tax_rate: q.taxRatePercent,
+      discount_type: q.orderDiscountType,
+      discount_value: q.orderDiscountValue,
+      notes: q.notes,
+      valid_until: q.validUntil || null,
+      subtotal_cents: totals.subtotalCents,
+      discount_cents: totals.discountCents,
+      tax_cents: totals.taxCents,
+      total_cents: totals.totalCents,
+      created_by: user?.id,
+      updated_by: user?.id,
+    })
+    .select("id")
+    .single();
+  if (error) return { ok: false as const, error: error.message };
+
+  if (q.lineItems.length) {
+    const { error: liErr } = await supabase.from("line_items").insert(
+      q.lineItems.map((li, i) => ({
+        quote_id: data.id,
+        description: li.description,
+        quantity: li.quantity,
+        rate_cents: li.rateCents,
+        discount_type: li.discountType,
+        discount_value: li.discountValue,
+        product_id: li.productId ?? null,
+        position: i,
+      })),
+    );
+    if (liErr) return { ok: false as const, error: liErr.message };
+  }
+
+  await recordActivity(supabase, { quote_id: data.id, user_id: user?.id, action: "created", detail: {} });
+  revalidatePath("/quotes");
+  revalidatePath("/");
+  return { ok: true as const, id: data.id as string };
+}
+
+export async function saveQuote(id: string, input: unknown) {
+  const priced = priceQuote(input);
+  if (!priced.ok) return { ok: false as const, error: priced.error };
+  const { q, totals } = priced;
 
   const supabase = await createClient();
   const {
@@ -155,6 +209,18 @@ export async function setStatus(id: string, status: QuoteStatus) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  // A quote can only be finalized once it has at least one line item — an empty
+  // quote has nothing to commit to the client. Checked server-side so the UI
+  // can't be bypassed.
+  if (status === "finalized") {
+    const { count, error: countErr } = await supabase
+      .from("line_items")
+      .select("id", { count: "exact", head: true })
+      .eq("quote_id", id);
+    if (countErr) return { ok: false as const, error: countErr.message };
+    const blocked = finalizeBlockedReason(count ?? 0);
+    if (blocked) return { ok: false as const, error: blocked };
+  }
   // Enforce the lifecycle atomically: the row moves to `status` only if its
   // current status is one the state machine allows to reach it. An illegal jump
   // (e.g. draft -> paid, skipping finalize/send) matches no row and is rejected.

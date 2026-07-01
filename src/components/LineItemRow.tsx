@@ -19,6 +19,7 @@ import { MoneyInput } from "@/components/MoneyInput";
 import { NumberInput } from "@/components/NumberInput";
 import { ProductPicker } from "@/components/ProductPicker";
 import type { ProductOption } from "@/lib/product-option";
+import type { LineFieldErrors } from "@/lib/quote-errors";
 
 export type LineItemPatch = Partial<{
   description: string;
@@ -37,7 +38,10 @@ type Props = {
   discountValue: number;
   lineNetCents: number;
   products: ProductOption[];
+  // Visible (post-blur) errors for this line's fields, keyed by field name.
+  errors?: LineFieldErrors;
   onChange: (patch: LineItemPatch) => void;
+  onFieldBlur?: (field: keyof LineFieldErrors) => void;
   onRemove: () => void;
 };
 
@@ -49,10 +53,16 @@ export function LineItemRow({
   discountValue,
   lineNetCents,
   products,
+  errors = {},
   onChange,
+  onFieldBlur,
   onRemove,
 }: Props) {
   const hasDiscount = discountType !== "none";
+  // Keyed by field name (not message text) so identical messages can't collide.
+  const messages = (["description", "quantity", "rateCents", "discountValue"] as const).flatMap((field) =>
+    errors[field] ? [{ field, message: errors[field]! }] : [],
+  );
 
   return (
     <div className="group/row border-b px-4 py-3 transition-colors last:border-b-0 hover:bg-muted/20">
@@ -76,7 +86,9 @@ export function LineItemRow({
           placeholder="Add a description…"
           className="h-9 flex-1 text-[15px] font-medium placeholder:font-normal placeholder:text-muted-foreground/60"
           value={description}
+          aria-invalid={errors.description ? true : undefined}
           onChange={(e) => onChange({ description: e.target.value })}
+          onBlur={() => onFieldBlur?.("description")}
         />
         <Button
           variant="ghost"
@@ -97,7 +109,9 @@ export function LineItemRow({
             className="h-8 w-16 px-1 text-center text-sm"
             value={quantity}
             placeholder="1"
+            error={errors.quantity}
             onChangeNumber={(n) => onChange({ quantity: n })}
+            onBlur={() => onFieldBlur?.("quantity")}
           />
         </label>
 
@@ -107,7 +121,9 @@ export function LineItemRow({
             aria-label="Rate"
             className="h-8 w-28 text-sm"
             valueCents={rateCents}
+            error={errors.rateCents}
             onChangeCents={(cents) => onChange({ rateCents: cents })}
+            onBlur={() => onFieldBlur?.("rateCents")}
           />
         </label>
 
@@ -136,14 +152,18 @@ export function LineItemRow({
                 className="h-8 w-16 text-sm"
                 value={discountValue}
                 placeholder="0"
+                error={errors.discountValue}
                 onChangeNumber={(n) => onChange({ discountValue: n })}
+                onBlur={() => onFieldBlur?.("discountValue")}
               />
             ) : (
               <MoneyInput
                 className="h-8 w-24 text-sm"
                 aria-label="Line discount amount"
                 valueCents={discountValue}
+                error={errors.discountValue}
                 onChangeCents={(cents) => onChange({ discountValue: cents })}
+                onBlur={() => onFieldBlur?.("discountValue")}
               />
             )}
             <button
@@ -161,6 +181,16 @@ export function LineItemRow({
           {formatCents(lineNetCents)}
         </span>
       </div>
+
+      {messages.length > 0 && (
+        <ul className="mt-1.5 space-y-0.5 pl-0.5">
+          {messages.map(({ field, message }) => (
+            <li key={field} className="text-xs font-medium text-destructive">
+              {message}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -4,7 +4,8 @@
  * What:        Composes the header, the editable form (draft) or read-only
  *              invoice view (finalized), the sticky totals bar, and the send
  *              dialog. All state + persistence live in useQuoteEditor.
- * Where used:  The /quotes/[id] route.
+ * Where used:  The /quotes/[id] route (existing quote) and /quotes/new (a new
+ *              quote, rendered with a null id until its first save).
  */
 "use client";
 
@@ -80,7 +81,6 @@ export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
           onStatusSelect={(s) => (s === "sent" ? q.setSendOpen(true) : q.applyStatus(s))}
           statusPending={q.statusPending}
           saving={q.saving}
-          saveDisabled={!!q.validationError}
           onSave={q.save}
           onEdit={() => q.applyStatus("draft")}
         />
@@ -105,7 +105,9 @@ export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
           <QuoteEditorForm
             clients={q.clients}
             clientId={q.clientId}
+            clientError={q.fieldError("clientId")}
             onClientChange={q.changeClient}
+            onClientBlur={() => q.markTouched("clientId")}
             onClientAdded={q.addClient}
             products={q.products}
             lines={q.lines}
@@ -113,14 +115,19 @@ export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
             onUpdateLine={q.updateLine}
             onAddLine={q.addLine}
             onRemoveLine={q.removeLine}
+            lineErrors={q.lineErrors}
+            onLineBlur={(key, field) => q.markTouched(`${key}:${field}`)}
             discountType={q.orderDiscountType}
             discountValue={q.orderDiscountValue}
             taxRatePercent={q.taxRatePercent}
             discountCents={totals.discountCents}
             taxCents={totals.taxCents}
-            discountError={q.validationError}
+            discountError={q.fieldError("orderDiscount")}
+            taxError={q.fieldError("taxRatePercent")}
             onDiscountChange={q.changeDiscount}
+            onDiscountBlur={() => q.markTouched("orderDiscount")}
             onTaxChange={q.changeTax}
+            onTaxBlur={() => q.markTouched("taxRatePercent")}
             notes={q.notes}
             onNotesChange={q.changeNotes}
           />
@@ -135,7 +142,6 @@ export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
         totalCents={totals.totalCents}
         saving={q.saving}
         statusPending={q.statusPending}
-        finalizeDisabled={!!q.validationError}
         banner={footerBanner}
         onFinalize={q.finalize}
         onExport={q.exportPdf}

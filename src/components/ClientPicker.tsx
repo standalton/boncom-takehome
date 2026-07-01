@@ -23,11 +23,15 @@ type Item = { value: string; label: string; company: string };
 type Props = {
   clients: ClientOption[];
   value: string;
+  // When set, the trigger renders in its invalid (red) state with the message
+  // below — the client field has no separate input to attach an error to.
+  error?: string;
   onChange: (id: string) => void;
+  onBlur?: () => void;
   onClientAdded: (client: Client) => void;
 };
 
-export function ClientPicker({ clients, value, onChange, onClientAdded }: Props) {
+export function ClientPicker({ clients, value, error, onChange, onBlur, onClientAdded }: Props) {
   const items = useMemo<Item[]>(
     () =>
       clients.map((c) => ({
@@ -53,7 +57,11 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
         }}
         onInputValueChange={(text) => setQuery(text)}
       >
-        <Combobox.Trigger className="group/trigger flex h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-3 text-left text-sm outline-none transition-[background-color,border-color,box-shadow] duration-150 hover:border-ring/60 hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 data-popup-open:border-ring data-popup-open:ring-[3px] data-popup-open:ring-ring/30">
+        <Combobox.Trigger
+          aria-invalid={error ? true : undefined}
+          onBlur={onBlur}
+          className="group/trigger flex h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-3 text-left text-sm outline-none transition-[background-color,border-color,box-shadow] duration-150 hover:border-ring/60 hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 data-popup-open:border-ring data-popup-open:ring-[3px] data-popup-open:ring-ring/30 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20"
+        >
           <Combobox.Value>
             {(val: Item | null) =>
               val ? (
@@ -114,6 +122,8 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
           </Combobox.Positioner>
         </Combobox.Portal>
       </Combobox.Root>
+
+      {error && <p className="mt-1.5 text-xs font-medium text-destructive">{error}</p>}
 
       <NewClientDialog
         open={addOpen}
