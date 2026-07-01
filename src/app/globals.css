@@ -133,6 +133,8 @@
   /* Interactive elements get a pointer cursor (Tailwind v4 resets buttons to default). */
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([data-disabled]),
+  [role="option"]:not([data-disabled]),
   select:not(:disabled),
   summary,
   a[href] {

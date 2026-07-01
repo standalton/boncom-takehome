@@ -155,6 +155,75 @@ export async function setStatus(id: string, status: QuoteStatus) {
   return { ok: true as const };
 }
 
+export async function duplicateQuote(id: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: src, error: readErr } = await supabase
+    .from("quotes")
+    .select("*, line_items(*)")
+    .eq("id", id)
+    .single();
+  if (readErr) return { ok: false as const, error: readErr.message };
+
+  // The new quote starts as a fresh draft; its number is auto-generated.
+  const { data: created, error: insErr } = await supabase
+    .from("quotes")
+    .insert({
+      client_id: src.client_id,
+      status: "draft",
+      tax_rate: src.tax_rate,
+      discount_type: src.discount_type,
+      discount_value: src.discount_value,
+      notes: src.notes,
+      valid_until: src.valid_until,
+      subtotal_cents: src.subtotal_cents,
+      discount_cents: src.discount_cents,
+      tax_cents: src.tax_cents,
+      total_cents: src.total_cents,
+      created_by: user?.id,
+      updated_by: user?.id,
+    })
+    .select("id")
+    .single();
+  if (insErr) return { ok: false as const, error: insErr.message };
+
+  const items = (src.line_items ?? []).map(
+    (li: {
+      description: string;
+      quantity: number;
+      rate_cents: number;
+      discount_type: string;
+      discount_value: number;
+      position: number;
+      product_id: string | null;
+    }) => ({
+      quote_id: created.id,
+      description: li.description,
+      quantity: li.quantity,
+      rate_cents: li.rate_cents,
+      discount_type: li.discount_type,
+      discount_value: li.discount_value,
+      position: li.position,
+      product_id: li.product_id,
+    }),
+  );
+  if (items.length) {
+    const { error: liErr } = await supabase.from("line_items").insert(items);
+    if (liErr) return { ok: false as const, error: liErr.message };
+  }
+
+  await supabase
+    .from("activity_log")
+    .insert({ quote_id: created.id, user_id: user?.id, action: "created", detail: { duplicated_from: id } });
+
+  revalidatePath("/quotes");
+  revalidatePath("/");
+  return { ok: true as const, id: created.id as string };
+}
+
 export async function deleteQuote(id: string) {
   const supabase = await createClient();
   // Line items and activity-log entries are removed by ON DELETE CASCADE.

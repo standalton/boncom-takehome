@@ -15,8 +15,8 @@ const sample: QuoteExportData = {
     phone: "(415) 555-0142",
   },
   lines: [
-    { description: "Website build", quantity: 1, rateCents: 1200000, discountLabel: "10% discount", lineNetCents: 1080000 },
-    { description: "SEO retainer", quantity: 3, rateCents: 180000, discountLabel: "", lineNetCents: 540000 },
+    { description: "Website build", quantity: 1, rateCents: 1200000, lineNetCents: 1080000 },
+    { description: "SEO retainer", quantity: 3, rateCents: 180000, lineNetCents: 540000 },
   ],
   subtotalCents: 1620000,
   discountCents: 81000,

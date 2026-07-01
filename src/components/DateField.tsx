@@ -24,15 +24,19 @@ function formatPretty(iso: string) {
 type Props = {
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 };
 
-export function DateField({ value, onChange }: Props) {
+export function DateField({ value, onChange, disabled }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="relative inline-flex">
       <Popover.Root open={open} onOpenChange={setOpen}>
-        <Popover.Trigger className="inline-flex h-9 w-40 items-center gap-2 rounded-lg border border-input bg-background py-0 pr-7 pl-2.5 text-sm whitespace-nowrap transition-colors hover:border-ring/70 hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 data-popup-open:border-ring">
+        <Popover.Trigger
+          disabled={disabled}
+          className="inline-flex h-9 w-40 items-center gap-2 rounded-lg border border-input bg-background py-0 pr-7 pl-2.5 text-sm whitespace-nowrap transition-colors hover:border-ring/70 hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-60 data-popup-open:border-ring"
+        >
           <CalendarIcon className="size-4 shrink-0 text-muted-foreground" />
           {value ? (
             <span className="text-foreground tabular-nums">{formatPretty(value)}</span>
@@ -55,7 +59,7 @@ export function DateField({ value, onChange }: Props) {
         </Popover.Portal>
       </Popover.Root>
 
-      {value && (
+      {value && !disabled && (
         <button
           type="button"
           aria-label="Clear date"

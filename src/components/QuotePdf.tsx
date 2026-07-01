@@ -22,9 +22,11 @@ export type QuoteExportLine = {
   description: string;
   quantity: number;
   rateCents: number;
-  discountLabel: string;
   lineNetCents: number;
 };
+
+const lineGross = (line: QuoteExportLine) => Math.round(line.quantity * line.rateCents);
+const lineDiscount = (line: QuoteExportLine) => Math.max(0, lineGross(line) - line.lineNetCents);
 
 export type QuoteExportData = {
   number: string;
@@ -58,11 +60,11 @@ const styles = StyleSheet.create({
   metaKey: { color: MUTED },
   tHead: { flexDirection: "row", backgroundColor: NAVY, color: "#ffffff", paddingVertical: 7, paddingHorizontal: 8, fontFamily: "Helvetica-Bold", fontSize: 9 },
   tRow: { flexDirection: "row", paddingVertical: 8, paddingHorizontal: 8, borderBottomWidth: 1, borderBottomColor: BORDER },
-  cDesc: { width: "52%" },
-  cQty: { width: "12%", textAlign: "right" },
-  cRate: { width: "18%", textAlign: "right" },
-  cAmt: { width: "18%", textAlign: "right" },
-  discNote: { fontSize: 8, color: MUTED, marginTop: 2 },
+  cDesc: { width: "40%" },
+  cQty: { width: "10%", textAlign: "right" },
+  cRate: { width: "17%", textAlign: "right" },
+  cDisc: { width: "16%", textAlign: "right", color: MUTED },
+  cAmt: { width: "17%", textAlign: "right" },
   totals: { marginTop: 18, alignSelf: "flex-end", width: "45%" },
   totalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 3 },
   grandRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 6, paddingTop: 8, borderTopWidth: 2, borderTopColor: NAVY },
@@ -114,19 +116,21 @@ export function QuotePdf({ data }: { data: QuoteExportData }) {
           <Text style={styles.cDesc}>Description</Text>
           <Text style={styles.cQty}>Qty</Text>
           <Text style={styles.cRate}>Rate</Text>
+          <Text style={styles.cDisc}>Discount</Text>
           <Text style={styles.cAmt}>Amount</Text>
         </View>
-        {data.lines.map((l, i) => (
-          <View style={styles.tRow} key={i} wrap={false}>
-            <View style={styles.cDesc}>
-              <Text>{l.description || "—"}</Text>
-              {l.discountLabel ? <Text style={styles.discNote}>{l.discountLabel}</Text> : null}
+        {data.lines.map((l, i) => {
+          const disc = lineDiscount(l);
+          return (
+            <View style={styles.tRow} key={i} wrap={false}>
+              <Text style={styles.cDesc}>{l.description || "—"}</Text>
+              <Text style={styles.cQty}>{l.quantity}</Text>
+              <Text style={styles.cRate}>{formatCents(l.rateCents)}</Text>
+              <Text style={styles.cDisc}>{disc > 0 ? `-${formatCents(disc)}` : "—"}</Text>
+              <Text style={styles.cAmt}>{formatCents(l.lineNetCents)}</Text>
             </View>
-            <Text style={styles.cQty}>{l.quantity}</Text>
-            <Text style={styles.cRate}>{formatCents(l.rateCents)}</Text>
-            <Text style={styles.cAmt}>{formatCents(l.lineNetCents)}</Text>
-          </View>
-        ))}
+          );
+        })}
 
         <View style={styles.totals}>
           <View style={styles.totalRow}>
@@ -135,7 +139,7 @@ export function QuotePdf({ data }: { data: QuoteExportData }) {
           </View>
           {data.discountCents > 0 ? (
             <View style={styles.totalRow}>
-              <Text style={styles.metaKey}>Discount</Text>
+              <Text style={styles.metaKey}>Order discount</Text>
               <Text>-{formatCents(data.discountCents)}</Text>
             </View>
           ) : null}
