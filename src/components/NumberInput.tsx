@@ -13,7 +13,7 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { selectAllOnFocus } from "@/lib/field-helpers";
+import { selectAllOnFocus, sanitizeDecimalInput } from "@/lib/field-helpers";
 
 type NumberInputProps = {
   value: number;
@@ -36,8 +36,9 @@ export function NumberInput({ value, onChangeNumber, error, errorId, ...props }:
       aria-describedby={error ? errorId : undefined}
       {...selectAllOnFocus}
       onChange={(e) => {
-        // Allow only digits and one decimal point.
-        const cleaned = e.target.value.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
+        // Allow only digits and one decimal point (quantities/percentages are
+        // not capped to two places — that's a money-only rule).
+        const cleaned = sanitizeDecimalInput(e.target.value);
         setText(cleaned);
         const n = Number(cleaned);
         onChangeNumber(Number.isNaN(n) ? 0 : n);

@@ -5,14 +5,15 @@
  *              integer cents via onChangeCents.
  * Where used:  Line item rates and fixed-dollar discounts in the quote editor.
  * Notes:       Holds a local text string so partial input (e.g. "19.") types
- *              smoothly; parsing/validation of the cents value happens upstream.
+ *              smoothly; entry is capped at two decimals (integer cents), and
+ *              parsing/validation of the cents value happens upstream.
  */
 "use client";
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { dollarsToCents } from "@/lib/money";
-import { selectAllOnFocus } from "@/lib/field-helpers";
+import { selectAllOnFocus, sanitizeDecimalInput } from "@/lib/field-helpers";
 import { cn } from "@/lib/utils";
 
 type MoneyInputProps = {
@@ -42,8 +43,10 @@ export function MoneyInput({ valueCents, onChangeCents, className, error, errorI
         aria-describedby={error ? errorId : undefined}
         {...selectAllOnFocus}
         onChange={(e) => {
-          setText(e.target.value);
-          onChangeCents(dollarsToCents(e.target.value));
+          // Dollars are stored as integer cents, so cap entry at two decimals.
+          const cleaned = sanitizeDecimalInput(e.target.value, 2);
+          setText(cleaned);
+          onChangeCents(dollarsToCents(cleaned));
         }}
         {...props}
       />
