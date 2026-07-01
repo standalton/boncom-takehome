@@ -117,6 +117,7 @@ building something new, to avoid duplicating what already exists. Format:_
 | `HelpHint` + `helpText` | `src/components/HelpHint.tsx`, `src/lib/help-text.ts` | The one tooltip pattern + central copy. |
 | `MoneyInput` | `src/components/MoneyInput.tsx` | Currency input bound to integer cents. |
 | `NumberInput` | `src/components/NumberInput.tsx` | Numeric input (local text state) reporting a parsed number. |
+| `useSyncedText` | `src/lib/use-synced-text.ts` | Local editable text that re-seeds from an external value when the parent changes it, without clobbering in-progress typing; backs MoneyInput and NumberInput. |
 | `selectAllOnFocus` | `src/lib/field-helpers.ts` | Select an input's contents on focus (with mouseup guard). |
 | `sanitizeDecimalInput` | `src/lib/field-helpers.ts` | Clean free-typed numeric text (digits + one point); caps decimals when asked. MoneyInput passes `2` to constrain dollar entry to whole cents; NumberInput uses it uncapped. |
 | `formatPhoneInput` + `PHONE_PATTERN` / `isCompletePhone` | `src/lib/field-helpers.ts` | Progressive input mask forcing US phone shape `(123) 456-7890`; `PHONE_PATTERN` is the shared completeness check, reused by NewClientDialog (inline) and the clients server action (backstop). |

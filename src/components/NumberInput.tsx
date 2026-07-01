@@ -11,9 +11,9 @@
  */
 "use client";
 
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { selectAllOnFocus, sanitizeDecimalInput } from "@/lib/field-helpers";
+import { useSyncedText } from "@/lib/use-synced-text";
 
 type NumberInputProps = {
   value: number;
@@ -26,8 +26,16 @@ type NumberInputProps = {
   errorId?: string;
 } & Omit<React.ComponentProps<typeof Input>, "value" | "onChange" | "type">;
 
+const numberToText = (n: number) => (n ? String(n) : "");
+const parseNumber = (t: string) => {
+  const n = Number(t);
+  return Number.isNaN(n) ? 0 : n;
+};
+
 export function NumberInput({ value, onChangeNumber, error, errorId, ...props }: NumberInputProps) {
-  const [text, setText] = useState(value ? String(value) : "");
+  // Re-seeds from value when the parent changes it, but leaves in-progress input
+  // like "2." alone.
+  const [text, setText] = useSyncedText(value, numberToText, parseNumber);
   return (
     <Input
       inputMode="decimal"
@@ -40,8 +48,7 @@ export function NumberInput({ value, onChangeNumber, error, errorId, ...props }:
         // not capped to two places — that's a money-only rule).
         const cleaned = sanitizeDecimalInput(e.target.value);
         setText(cleaned);
-        const n = Number(cleaned);
-        onChangeNumber(Number.isNaN(n) ? 0 : n);
+        onChangeNumber(parseNumber(cleaned));
       }}
       {...props}
     />

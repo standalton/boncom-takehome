@@ -10,10 +10,10 @@
  */
 "use client";
 
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { dollarsToCents } from "@/lib/money";
 import { selectAllOnFocus, sanitizeDecimalInput } from "@/lib/field-helpers";
+import { useSyncedText } from "@/lib/use-synced-text";
 import { cn } from "@/lib/utils";
 
 type MoneyInputProps = {
@@ -28,8 +28,12 @@ type MoneyInputProps = {
   errorId?: string;
 } & Omit<React.ComponentProps<typeof Input>, "value" | "onChange" | "type">;
 
+const centsToText = (cents: number) => (cents ? (cents / 100).toString() : "");
+
 export function MoneyInput({ valueCents, onChangeCents, className, error, errorId, ...props }: MoneyInputProps) {
-  const [text, setText] = useState(valueCents ? (valueCents / 100).toString() : "");
+  // Re-seeds from valueCents when the parent changes it (a product pick filling
+  // the rate, a reset), but leaves in-progress input like "19." alone.
+  const [text, setText] = useSyncedText(valueCents, centsToText, dollarsToCents);
   return (
     <div className="relative">
       <span className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-sm text-muted-foreground">
