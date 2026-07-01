@@ -88,7 +88,7 @@ codebase grows. Format:_
 | Server actions (mutations) | `src/actions/` (auth, clients, quotes, products) |
 | Supabase clients + middleware | `src/lib/supabase/` |
 | Routes / pages | `src/app/(app)/` (dashboard, clients, quotes, products), `src/app/login/` |
-| Database schema + seed | `supabase/migrations/`, `supabase/seed.sql` |
+| Database schema + seed | `supabase/migrations/`, `supabase/seed.sql` (named-UUID base rows + a deterministic bulk block that generates ~60 clients / ~75 quotes for a multi-page demo) |
 | Unit tests | colocated `src/**/*.test.ts` |
 | E2E tests | `e2e/` |
 
