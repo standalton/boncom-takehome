@@ -1,26 +1,34 @@
 /**
  * quotes/page.tsx — the quotes list.
  *
- * What:        Full searchable list of quotes with a "New quote" action.
+ * What:        Full searchable, sortable, status-filterable list of quotes with
+ *              a "New quote" action.
  * Where used:  The /quotes route (linked from the sidebar).
  */
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { listQuotes } from "@/actions/quote-queries";
 import { parsePage } from "@/lib/pagination";
+import { parseSort, QUOTE_SORTS, QUOTE_SORT_DEFAULT } from "@/lib/list-params";
+import { QUOTE_STATUSES } from "@/lib/quote-status";
+import { statusMeta } from "@/components/StatusSelect";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { FilterSelect } from "@/components/FilterSelect";
 import { Pagination } from "@/components/Pagination";
 import { QuoteList, type QuoteListRow } from "@/components/QuoteList";
+
+const statusOptions = QUOTE_STATUSES.map((s) => ({ value: s, label: statusMeta[s].label }));
 
 export default async function QuotesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; sort?: string; dir?: string; status?: string }>;
 }) {
-  const { q, page: pageParam } = await searchParams;
+  const { q, page: pageParam, sort, dir, status } = await searchParams;
   const page = parsePage(pageParam);
-  const res = await listQuotes(q, page);
+  const sortSpec = parseSort(sort, dir, QUOTE_SORTS, QUOTE_SORT_DEFAULT);
+  const res = await listQuotes(q, page, sortSpec, status);
   const quotes = (res.ok ? res.data : []) as unknown as QuoteListRow[];
   const total = res.ok ? res.count : 0;
 
@@ -34,9 +42,21 @@ export default async function QuotesPage({
         </Link>
       </div>
 
-      <form className="mb-4 max-w-xs">
-        <Input name="q" defaultValue={q ?? ""} placeholder="Search by number…" />
-      </form>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* Hidden inputs keep an active sort/filter when a new search is submitted. */}
+        <form className="max-w-xs flex-1">
+          <Input name="q" defaultValue={q ?? ""} placeholder="Search by number…" />
+          {sort && <input type="hidden" name="sort" value={sort} />}
+          {dir && <input type="hidden" name="dir" value={dir} />}
+          {status && <input type="hidden" name="status" value={status} />}
+        </form>
+        <FilterSelect
+          param="status"
+          options={statusOptions}
+          allLabel="All statuses"
+          className="w-44"
+        />
+      </div>
 
       {!res.ok ? (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
@@ -44,7 +64,7 @@ export default async function QuotesPage({
         </div>
       ) : quotes.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-          {q ? "No quotes match your search." : "No quotes yet. Create your first one."}
+          {q || status ? "No quotes match your search." : "No quotes yet. Create your first one."}
         </div>
       ) : (
         <>

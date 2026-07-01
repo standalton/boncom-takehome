@@ -1,8 +1,8 @@
 /**
  * QuoteList.tsx — the dashboard quote table.
  *
- * What:        Renders quotes as fully clickable rows (the whole row opens the
- *              quote in a new tab), with status badges and totals.
+ * What:        Renders quotes as fully clickable rows (the whole row navigates,
+ *              with a hover highlight), with status badges and totals.
  * Where used:  The dashboard page.
  * Notes:       Client component so rows can navigate on click.
  */
@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { formatCents } from "@/lib/money";
 import type { QuoteStatus } from "@/lib/types";
 import { DeleteQuoteButton } from "@/components/DeleteQuoteButton";
+import { SortableHead } from "@/components/SortableHead";
 import {
   Table,
   TableBody,
@@ -26,7 +27,7 @@ const statusStyles: Record<QuoteStatus, string> = {
   finalized: "bg-amber-100 text-amber-800",
   sent: "bg-blue-100 text-blue-800",
   accepted: "bg-green-100 text-green-800",
-  paid: "bg-emerald-100 text-emerald-800",
+  paid: "bg-emerald-600 text-white",
   declined: "bg-red-100 text-red-800",
 };
 
@@ -47,11 +48,11 @@ export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Number</TableHead>
+            <SortableHead column="number" label="Number" />
             <TableHead>Client</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-            <TableHead>Updated</TableHead>
+            <SortableHead column="status" label="Status" />
+            <SortableHead column="total_cents" label="Total" align="right" firstDir="desc" />
+            <SortableHead column="updated_at" label="Updated" firstDir="desc" />
             <TableHead className="w-10">
               <span className="sr-only">Actions</span>
             </TableHead>
@@ -61,7 +62,7 @@ export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
           {quotes.map((quote) => (
             <TableRow
               key={quote.id}
-              onClick={() => window.open(`/quotes/${quote.id}`, "_blank", "noopener,noreferrer")}
+              onClick={() => router.push(`/quotes/${quote.id}`)}
               className="cursor-pointer select-none transition-colors hover:bg-muted/50 [&_td]:cursor-pointer"
             >
               <TableCell className="font-medium text-primary">{quote.number}</TableCell>

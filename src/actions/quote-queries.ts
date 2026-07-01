@@ -11,16 +11,26 @@
 import { createClient } from "@/lib/supabase/server";
 import { toActivityEntries } from "@/lib/activity";
 import { pageRange } from "@/lib/pagination";
+import { applySort, QUOTE_SORT_DEFAULT, type SortSpec } from "@/lib/list-params";
+import { isQuoteStatus } from "@/lib/quote-status";
 
-export async function listQuotes(search?: string, page?: number) {
+export async function listQuotes(
+  search?: string,
+  page?: number,
+  sort: SortSpec = QUOTE_SORT_DEFAULT,
+  status?: string,
+) {
   const supabase = await createClient();
   let query = supabase
     .from("quotes")
-    .select("*, clients(company, contact_name)", { count: "exact" })
-    .order("updated_at", { ascending: false });
+    .select("*, clients(company, contact_name)", { count: "exact" });
   if (search && search.trim()) {
     query = query.ilike("number", `%${search.trim()}%`);
   }
+  if (status && isQuoteStatus(status)) {
+    query = query.eq("status", status);
+  }
+  query = applySort(query, sort);
   // A page number means "paginate"; its absence (e.g. the dashboard) means "all".
   if (page !== undefined) {
     const { from, to } = pageRange(page);
