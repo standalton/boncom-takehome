@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { MoneyInput } from "@/components/MoneyInput";
 import { NumberInput } from "@/components/NumberInput";
 import { ProductPicker } from "@/components/ProductPicker";
-import type { ProductOption } from "@/lib/product-option";
+import { patchForProductPick, type ProductOption } from "@/lib/product-option";
 import type { LineFieldErrors } from "@/lib/quote-errors";
 
 export type LineItemPatch = Partial<{
@@ -38,6 +38,9 @@ type Props = {
   discountType: DiscountType;
   discountValue: number;
   lineNetCents: number;
+  // The catalog product this line was last filled from (null if none). Lets a
+  // re-pick tell an auto-filled description from one the user actually typed.
+  productId: string | null;
   products: ProductOption[];
   // Visible (post-blur) errors for this line's fields, keyed by field name.
   errors?: LineFieldErrors;
@@ -53,6 +56,7 @@ export function LineItemRow({
   discountType,
   discountValue,
   lineNetCents,
+  productId,
   products,
   errors = {},
   onChange,
@@ -75,16 +79,10 @@ export function LineItemRow({
         {products.length > 0 && (
           <ProductPicker
             products={products}
-            // Picking a product fills the line; a blank description takes the
-            // product name, but a description you've already typed is kept.
-            // productId records that this came from the catalog (for history).
-            onSelect={(p) =>
-              onChange({
-                description: description.trim() ? description : p.name,
-                rateCents: p.rateCents,
-                productId: p.id,
-              })
-            }
+            // Picking a product fills rate + productId and takes the product
+            // name, unless you've typed your own description (see
+            // patchForProductPick). Re-picking swaps an auto-filled name.
+            onSelect={(p) => onChange(patchForProductPick(p, { description, productId }, products))}
           />
         )}
         <Input

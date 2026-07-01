@@ -123,7 +123,7 @@ building something new, to avoid duplicating what already exists. Format:_
 | `formatPhoneInput` + `PHONE_PATTERN` / `isCompletePhone` | `src/lib/field-helpers.ts` | Progressive input mask forcing US phone shape `(123) 456-7890`; `PHONE_PATTERN` is the shared completeness check, reused by NewClientDialog (inline) and the clients server action (backstop). |
 | `ClientPicker` | `src/components/ClientPicker.tsx` | Searchable customer combobox with inline "add new". |
 | `ClientList` | `src/components/ClientList.tsx` | Clients table; rows expand inline to show that client's quote history (lazy-loaded via listQuotesByClient). |
-| `ProductPicker` + `toProductOption` | `src/components/ProductPicker.tsx`, `src/lib/product-option.ts` | Per-line catalog picker; fills a line's description + rate from a product. |
+| `ProductPicker` + `toProductOption` / `patchForProductPick` | `src/components/ProductPicker.tsx`, `src/lib/product-option.ts` | Per-line catalog picker; fills a line's description + rate from a product. `patchForProductPick` builds the line patch, swapping an auto-filled description when the catalog item changes but keeping a hand-typed one. |
 | `NewClientDialog` | `src/components/NewClientDialog.tsx` | Modal to create or edit a client (shared form) without leaving the screen. |
 | `ClientActionsMenu` | `src/components/ClientActionsMenu.tsx` | Per-row edit + delete menu for a client (delete refused if quotes exist). |
 | `ProductDialog` | `src/components/ProductDialog.tsx` | Create/edit a catalog product (shared form; used by add + edit). |

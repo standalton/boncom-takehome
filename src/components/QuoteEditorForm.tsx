@@ -131,6 +131,7 @@ export function QuoteEditorForm({
               discountType={l.discountType}
               discountValue={l.discountValue}
               lineNetCents={lineNets[i] ?? 0}
+              productId={l.productId}
               products={products}
               errors={lineErrors(l.key)}
               onChange={(patch) => onUpdateLine(l.key, patch)}
