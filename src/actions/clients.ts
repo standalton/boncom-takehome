@@ -10,6 +10,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { PHONE_PATTERN } from "@/lib/field-helpers";
 import { pageRange } from "@/lib/pagination";
 import { applySort, CLIENT_SORT_DEFAULT, type SortSpec } from "@/lib/list-params";
 import type { Client } from "@/lib/types";
@@ -22,7 +23,14 @@ const clientInput = z.object({
     .optional()
     .default("")
     .refine((v) => !v || /.+@.+\..+/.test(v), "Enter a valid email"),
-  phone: z.string().optional().default(""),
+  // Optional, but any value must be the exact (123) 456-7890 shape. The UI
+  // masks it there; this re-checks it here because the client is never trusted.
+  // PHONE_PATTERN is the single source of truth, shared with the input mask.
+  phone: z
+    .string()
+    .optional()
+    .default("")
+    .refine((v) => !v || PHONE_PATTERN.test(v), "Phone must look like (123) 456-7890"),
 });
 
 export async function listClients(

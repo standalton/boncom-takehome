@@ -32,7 +32,7 @@ describe("autoMap", () => {
   });
 });
 
-const row = ["Acme Corp", "Jane Doe", "jane@acme.com", "555-1234"];
+const row = ["Acme Corp", "Jane Doe", "jane@acme.com", "555-123-4567"];
 const map = { company: 0, contactName: 1, email: 2, phone: 3 };
 
 describe("cell", () => {
@@ -45,16 +45,27 @@ describe("cell", () => {
 });
 
 describe("buildClientRecord", () => {
-  it("builds a valid client", () => {
+  it("builds a valid client, normalizing the phone to (123) 456-7890", () => {
     expect(buildClientRecord(row, map)).toEqual({
       ok: true,
       record: {
         company: "Acme Corp",
         contactName: "Jane Doe",
         email: "jane@acme.com",
-        phone: "555-1234",
+        phone: "(555) 123-4567",
       },
     });
+  });
+  it("accepts a blank phone (optional)", () => {
+    const r = buildClientRecord(["Acme", "", "", ""], map);
+    expect(r).toEqual({
+      ok: true,
+      record: { company: "Acme", contactName: "", email: "", phone: "" },
+    });
+  });
+  it("rejects a phone that is not exactly 10 digits", () => {
+    expect(buildClientRecord(["Acme", "", "", "555-1234"], map).ok).toBe(false);
+    expect(buildClientRecord(["Acme", "", "", "1 555 123 4567"], map).ok).toBe(false);
   });
   it("errors when company is blank", () => {
     const r = buildClientRecord(["", "", "", ""], map);

@@ -13,6 +13,7 @@
 import type { ColumnMapping, FieldDef, ImportTarget } from "./types";
 import { parseMoneyToCents } from "./parse-money";
 import { isProductUnit } from "@/lib/product-units";
+import { formatPhoneInput } from "@/lib/field-helpers";
 import { lineItemObject } from "@/lib/validation";
 
 export const TARGET_FIELDS: Record<ImportTarget, FieldDef[]> = {
@@ -83,6 +84,18 @@ export function cell(row: string[], mapping: ColumnMapping, key: string): string
 
 const emailOk = (v: string) => !v || /.+@.+\..+/.test(v);
 
+// Coerce an imported phone to the canonical (123) 456-7890 shape. A spreadsheet
+// may hold any separators, so we key off the digits: exactly 10 → format it,
+// empty → keep empty (phone is optional), anything else → reject with a clear
+// error rather than silently truncating (e.g. an 11-digit number). This keeps
+// imported clients in the same format the dialog enforces (see field-helpers).
+function normalizeImportPhone(raw: string): { ok: true; value: string } | { ok: false } {
+  if (!raw) return { ok: true, value: "" };
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length !== 10) return { ok: false };
+  return { ok: true, value: formatPhoneInput(digits) };
+}
+
 export interface ClientRecord {
   company: string;
   contactName: string;
@@ -95,13 +108,15 @@ export function buildClientRecord(row: string[], mapping: ColumnMapping): Record
   if (!company) return { ok: false, error: "Company is required" };
   const email = cell(row, mapping, "email");
   if (!emailOk(email)) return { ok: false, error: "Email is not valid" };
+  const phone = normalizeImportPhone(cell(row, mapping, "phone"));
+  if (!phone.ok) return { ok: false, error: "Phone must have 10 digits, like (123) 456-7890" };
   return {
     ok: true,
     record: {
       company,
       contactName: cell(row, mapping, "contactName"),
       email,
-      phone: cell(row, mapping, "phone"),
+      phone: phone.value,
     },
   };
 }
