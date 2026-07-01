@@ -7,6 +7,7 @@
  */
 import { listClients } from "@/actions/clients";
 import { parsePage } from "@/lib/pagination";
+import { parseSort, CLIENT_SORTS, CLIENT_SORT_DEFAULT } from "@/lib/list-params";
 import { AddClientDialog } from "@/components/AddClientDialog";
 import { ClientList } from "@/components/ClientList";
 import { Pagination } from "@/components/Pagination";
@@ -15,11 +16,12 @@ import { Input } from "@/components/ui/input";
 export default async function ClientsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; sort?: string; dir?: string }>;
 }) {
-  const { q, page: pageParam } = await searchParams;
+  const { q, page: pageParam, sort, dir } = await searchParams;
   const page = parsePage(pageParam);
-  const res = await listClients(q, page);
+  const sortSpec = parseSort(sort, dir, CLIENT_SORTS, CLIENT_SORT_DEFAULT);
+  const res = await listClients(q, page, sortSpec);
   const clients = res.ok ? res.data : [];
   const total = res.ok ? res.count : 0;
 
@@ -36,6 +38,9 @@ export default async function ClientsPage({
           defaultValue={q ?? ""}
           placeholder="Search by company, contact, email, or quote #…"
         />
+        {/* Hidden inputs keep an active sort when a new search is submitted. */}
+        {sort && <input type="hidden" name="sort" value={sort} />}
+        {dir && <input type="hidden" name="dir" value={dir} />}
       </form>
 
       {!res.ok ? (

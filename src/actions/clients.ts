@@ -11,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { pageRange } from "@/lib/pagination";
+import { applySort, CLIENT_SORT_DEFAULT, type SortSpec } from "@/lib/list-params";
 import type { Client } from "@/lib/types";
 
 const clientInput = z.object({
@@ -24,9 +25,13 @@ const clientInput = z.object({
   phone: z.string().optional().default(""),
 });
 
-export async function listClients(search?: string, page?: number) {
+export async function listClients(
+  search?: string,
+  page?: number,
+  sort: SortSpec = CLIENT_SORT_DEFAULT,
+) {
   const supabase = await createClient();
-  let query = supabase.from("clients").select("*", { count: "exact" }).order("company");
+  let query = supabase.from("clients").select("*", { count: "exact" });
   const term = search?.trim();
   if (term) {
     // Strip characters that are delimiters in PostgREST's or() filter syntax so
@@ -54,6 +59,7 @@ export async function listClients(search?: string, page?: number) {
 
     query = query.or(orParts.join(","));
   }
+  query = applySort(query, sort);
   if (page !== undefined) {
     const { from, to } = pageRange(page);
     query = query.range(from, to);

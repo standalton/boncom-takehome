@@ -17,6 +17,7 @@ import { listQuotesByClient } from "@/actions/quote-queries";
 import { formatCents } from "@/lib/money";
 import { statusMeta } from "@/components/StatusSelect";
 import { ClientActionsMenu } from "@/components/ClientActionsMenu";
+import { SortableHead } from "@/components/SortableHead";
 import type { Client, QuoteStatus } from "@/lib/types";
 import {
   Table,
@@ -67,9 +68,9 @@ export function ClientList({ clients }: { clients: Client[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Company</TableHead>
-            <TableHead>Contact</TableHead>
-            <TableHead>Email</TableHead>
+            <SortableHead column="company" label="Company" />
+            <SortableHead column="contact_name" label="Contact" />
+            <SortableHead column="email" label="Email" />
             <TableHead>Phone</TableHead>
             <TableHead className="w-10" aria-label="Actions" />
           </TableRow>
