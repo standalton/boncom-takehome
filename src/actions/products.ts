@@ -12,6 +12,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { isProductUnit } from "@/lib/product-units";
 import { pageRange } from "@/lib/pagination";
+import { applySort, PRODUCT_SORT_DEFAULT, type SortSpec } from "@/lib/list-params";
 import type { Product } from "@/lib/types";
 
 const productInput = z.object({
@@ -26,13 +27,17 @@ const productInput = z.object({
     .refine((v) => v === "" || isProductUnit(v), "Unknown unit"),
 });
 
-export async function listProducts(search?: string, page?: number) {
+export async function listProducts(
+  search?: string,
+  page?: number,
+  sort: SortSpec = PRODUCT_SORT_DEFAULT,
+  unit?: string,
+) {
   const supabase = await createClient();
   let query = supabase
     .from("products")
     .select("*", { count: "exact" })
-    .eq("active", true)
-    .order("name");
+    .eq("active", true);
   const term = search?.trim();
   if (term) {
     // Strip characters that are delimiters in PostgREST's or() filter syntax so
@@ -40,6 +45,10 @@ export async function listProducts(search?: string, page?: number) {
     const safe = term.replace(/[,()]/g, " ");
     query = query.or(`name.ilike.%${safe}%,description.ilike.%${safe}%`);
   }
+  if (unit && isProductUnit(unit)) {
+    query = query.eq("unit", unit);
+  }
+  query = applySort(query, sort);
   if (page !== undefined) {
     const { from, to } = pageRange(page);
     query = query.range(from, to);

@@ -6,10 +6,13 @@
  */
 import { listProducts } from "@/actions/products";
 import { formatCents } from "@/lib/money";
-import { formatUnit } from "@/lib/product-units";
+import { formatUnit, PRODUCT_UNITS } from "@/lib/product-units";
 import { parsePage } from "@/lib/pagination";
+import { parseSort, PRODUCT_SORTS, PRODUCT_SORT_DEFAULT } from "@/lib/list-params";
 import { AddProductDialog } from "@/components/AddProductDialog";
 import { ProductActionsMenu } from "@/components/ProductActionsMenu";
+import { FilterSelect } from "@/components/FilterSelect";
+import { SortableHead } from "@/components/SortableHead";
 import { Pagination } from "@/components/Pagination";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,11 +27,12 @@ import {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; sort?: string; dir?: string; unit?: string }>;
 }) {
-  const { q, page: pageParam } = await searchParams;
+  const { q, page: pageParam, sort, dir, unit } = await searchParams;
   const page = parsePage(pageParam);
-  const res = await listProducts(q, page);
+  const sortSpec = parseSort(sort, dir, PRODUCT_SORTS, PRODUCT_SORT_DEFAULT);
+  const res = await listProducts(q, page, sortSpec, unit);
   const products = res.ok ? res.data : [];
   const total = res.ok ? res.count : 0;
 
@@ -39,9 +43,21 @@ export default async function ProductsPage({
         <AddProductDialog />
       </div>
 
-      <form className="mb-4 max-w-xs">
-        <Input name="q" defaultValue={q ?? ""} placeholder="Search by name or description…" />
-      </form>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* Hidden inputs keep an active sort/filter when a new search is submitted. */}
+        <form className="max-w-xs flex-1">
+          <Input name="q" defaultValue={q ?? ""} placeholder="Search by name or description…" />
+          {sort && <input type="hidden" name="sort" value={sort} />}
+          {dir && <input type="hidden" name="dir" value={dir} />}
+          {unit && <input type="hidden" name="unit" value={unit} />}
+        </form>
+        <FilterSelect
+          param="unit"
+          options={PRODUCT_UNITS.map((u) => ({ value: u.value, label: u.label }))}
+          allLabel="All units"
+          className="w-44"
+        />
+      </div>
 
       {!res.ok ? (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
@@ -49,7 +65,7 @@ export default async function ProductsPage({
         </div>
       ) : products.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-          {q
+          {q || unit
             ? "No products match your search."
             : "No products yet. Add the services you offer to reuse them in quotes."}
         </div>
@@ -58,10 +74,15 @@ export default async function ProductsPage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <SortableHead column="name" label="Name" />
                 <TableHead>Description</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead className="text-right">Default rate</TableHead>
+                <SortableHead column="unit" label="Unit" />
+                <SortableHead
+                  column="default_rate_cents"
+                  label="Default rate"
+                  align="right"
+                  firstDir="desc"
+                />
                 <TableHead className="w-10" aria-label="Actions" />
               </TableRow>
             </TableHeader>
