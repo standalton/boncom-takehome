@@ -83,6 +83,7 @@ codebase grows. Format:_
 | Import server actions (parse/preview/commit) | `src/actions/import.ts` |
 | Import wizard UI + route | `src/components/import/`, `src/app/(app)/import/` |
 | Transactional import commit (SQL) | `supabase/migrations/0006_import_commit_rpc.sql` |
+| RLS policies (per-command, shared workspace) | `supabase/migrations/0001_init.sql`, `0007_tighten_rls_policies.sql` |
 | Activity-log write helpers (record + diff) | `src/lib/quote-audit.ts` |
 | Server actions (mutations) | `src/actions/` (auth, clients, quotes, products) |
 | Supabase clients + middleware | `src/lib/supabase/` |
@@ -117,6 +118,8 @@ building something new, to avoid duplicating what already exists. Format:_
 | `MoneyInput` | `src/components/MoneyInput.tsx` | Currency input bound to integer cents. |
 | `NumberInput` | `src/components/NumberInput.tsx` | Numeric input (local text state) reporting a parsed number. |
 | `selectAllOnFocus` | `src/lib/field-helpers.ts` | Select an input's contents on focus (with mouseup guard). |
+| `sanitizeDecimalInput` | `src/lib/field-helpers.ts` | Clean free-typed numeric text (digits + one point); caps decimals when asked. MoneyInput passes `2` to constrain dollar entry to whole cents; NumberInput uses it uncapped. |
+| `formatPhoneInput` + `PHONE_PATTERN` / `isCompletePhone` | `src/lib/field-helpers.ts` | Progressive input mask forcing US phone shape `(123) 456-7890`; `PHONE_PATTERN` is the shared completeness check, reused by NewClientDialog (inline) and the clients server action (backstop). |
 | `ClientPicker` | `src/components/ClientPicker.tsx` | Searchable customer combobox with inline "add new". |
 | `ClientList` | `src/components/ClientList.tsx` | Clients table; rows expand inline to show that client's quote history (lazy-loaded via listQuotesByClient). |
 | `ProductPicker` + `toProductOption` | `src/components/ProductPicker.tsx`, `src/lib/product-option.ts` | Per-line catalog picker; fills a line's description + rate from a product. |

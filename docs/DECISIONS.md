@@ -6,6 +6,32 @@ specifically about *the decisions behind the build*; this is where they live.
 
 Format: newest first.
 
+## 2026-06-30 — Tighten RLS policies (resolve advisor lint 0024)
+
+- **Decision:** Replaced the blanket `for all … using (true) with check (true)`
+  policies on `clients`, `products`, `quotes`, and `line_items` with
+  per-command policies (migration `0007_tighten_rls_policies.sql`). Reads stay
+  shared (`select using (true)`); writes carry a real predicate. `clients` and
+  `quotes` INSERT now require `created_by = auth.uid()`, and `activity_log`
+  INSERT requires `user_id = auth.uid()` — a user can no longer create rows or
+  forge audit entries attributed to someone else.
+- **Why:** The Supabase security advisor (lint 0024) flags `using (true)` /
+  `with check (true)` on write commands because it cannot distinguish an
+  intentional shared workspace from a missing policy. Splitting per command
+  keeps the intended "any authenticated teammate reads/edits everything" model
+  (the advisor explicitly excludes `select using (true)`) while adding genuine
+  attribution integrity where a truthful owner column exists.
+- **Behavior:** Unchanged for authenticated teammates — the write paths already
+  stamp `created_by` / `user_id` from the session (`createQuote`,
+  `createClient`, `recordActivity`, and the `import_commit` RPC), so the new
+  checks are satisfied by every existing flow. `products` (shared catalog, no
+  owner column) and `line_items` (child of `quotes`) gate writes on an
+  authenticated session / a real parent quote rather than an owner match.
+- **Remaining advisor item:** "Leaked password protection disabled" is Auth
+  config, not schema — enable HIBP checking in the Supabase dashboard
+  (Authentication → Sign In / Providers → Password). It cannot be set from a
+  migration.
+
 ## 2026-06-30 — Spreadsheet import parsers
 
 - **Decision:** Import accepts CSV and XLSX, parsed with `papaparse` (CSV) and
