@@ -80,6 +80,13 @@ covered by `npm run test:e2e` (Playwright).
 Next.js (App Router) + TypeScript · Supabase (Postgres, Auth, RLS) · Tailwind +
 shadcn/ui (Lucide icons) · Zod · Vitest + Playwright · deployed on Vercel.
 
+There's no hand-rolled REST layer: **Server Components** read from Supabase on
+the server, and **Server Actions** (`src/actions/` — auth, clients, quotes,
+products, import) handle every mutation. Each action re-validates input with the
+shared Zod schemas, enforces the status state machine, and writes the audit log
+server-side — so the rules hold no matter what the client sends. The browser
+only ever gets the public anon key, with RLS as the backstop on every table.
+
 ## What I'd do next
 
 A few things are designed for in the spec but intentionally deferred:
