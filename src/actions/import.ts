@@ -61,18 +61,23 @@ export async function parseUpload(formData: FormData) {
   }
 }
 
+// Load existing clients/products for exact-match resolution. Surfaces DB errors
+// rather than treating a failed query as "no existing records" — resolving
+// against a silently-empty set would create duplicates of everything.
 async function loadExisting(): Promise<{ clients: ExistingKey[]; products: ExistingKey[] }> {
   const supabase = await createClient();
-  const [{ data: clients }, { data: products }] = await Promise.all([
+  const [clientsRes, productsRes] = await Promise.all([
     supabase.from("clients").select("id, company"),
     supabase.from("products").select("id, name").eq("active", true),
   ]);
+  if (clientsRes.error) throw new Error(clientsRes.error.message);
+  if (productsRes.error) throw new Error(productsRes.error.message);
   return {
-    clients: (clients ?? []).map((c) => ({
+    clients: (clientsRes.data ?? []).map((c) => ({
       id: c.id as string,
       key: normalizeKey(c.company as string),
     })),
-    products: (products ?? []).map((p) => ({
+    products: (productsRes.data ?? []).map((p) => ({
       id: p.id as string,
       key: normalizeKey(p.name as string),
     })),
@@ -84,16 +89,20 @@ export async function previewImport(
   table: SheetTable,
   mapping: ColumnMapping,
 ) {
-  const { clients, products } = await loadExisting();
-  const preview = buildPreview({
-    target,
-    rows: table.rows,
-    mapping,
-    existingClients: clients,
-    existingProducts: products,
-    promotionThreshold: PROMOTION_THRESHOLD,
-  });
-  return { ok: true as const, preview };
+  try {
+    const { clients, products } = await loadExisting();
+    const preview = buildPreview({
+      target,
+      rows: table.rows,
+      mapping,
+      existingClients: clients,
+      existingProducts: products,
+      promotionThreshold: PROMOTION_THRESHOLD,
+    });
+    return { ok: true as const, preview };
+  } catch (e) {
+    return { ok: false as const, error: e instanceof Error ? e.message : "Could not build preview." };
+  }
 }
 
 // Build the ImportPlan from the sheet + mapping + the user's promotion choices,

@@ -11,6 +11,7 @@ import { parsePage } from "@/lib/pagination";
 import { parseSort, PRODUCT_SORTS, PRODUCT_SORT_DEFAULT } from "@/lib/list-params";
 import { AddProductDialog } from "@/components/AddProductDialog";
 import { ProductActionsMenu } from "@/components/ProductActionsMenu";
+import { ImportEntryButton } from "@/components/import/ImportEntryButton";
 import { FilterSelect } from "@/components/FilterSelect";
 import { SortableHead } from "@/components/SortableHead";
 import { Pagination } from "@/components/Pagination";
@@ -40,7 +41,10 @@ export default async function ProductsPage({
     <div className="px-8 py-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-primary">Products</h1>
-        <AddProductDialog />
+        <div className="flex gap-2">
+          <ImportEntryButton target="products" />
+          <AddProductDialog />
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">

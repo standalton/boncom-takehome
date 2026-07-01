@@ -11,12 +11,13 @@ import { listQuotes } from "@/actions/quote-queries";
 import { parsePage } from "@/lib/pagination";
 import { parseSort, QUOTE_SORTS, QUOTE_SORT_DEFAULT } from "@/lib/list-params";
 import { QUOTE_STATUSES } from "@/lib/quote-status";
-import { statusMeta } from "@/components/StatusSelect";
+import { statusMeta } from "@/lib/status-meta";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FilterSelect } from "@/components/FilterSelect";
 import { Pagination } from "@/components/Pagination";
 import { QuoteList, type QuoteListRow } from "@/components/QuoteList";
+import { ImportEntryButton } from "@/components/import/ImportEntryButton";
 
 const statusOptions = QUOTE_STATUSES.map((s) => ({ value: s, label: statusMeta[s].label }));
 
@@ -36,10 +37,13 @@ export default async function QuotesPage({
     <div className="px-8 py-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-xl font-semibold text-primary">Quotes</h1>
-        <Link href="/quotes/new" className={buttonVariants({ size: "sm" })}>
-          <Plus className="size-4" />
-          New quote
-        </Link>
+        <div className="flex gap-2">
+          <ImportEntryButton target="quotes" />
+          <Link href="/quotes/new" className={buttonVariants({ size: "sm" })}>
+            <Plus className="size-4" />
+            New quote
+          </Link>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">

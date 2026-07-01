@@ -9,6 +9,7 @@ import { listClients } from "@/actions/clients";
 import { parsePage } from "@/lib/pagination";
 import { parseSort, CLIENT_SORTS, CLIENT_SORT_DEFAULT } from "@/lib/list-params";
 import { AddClientDialog } from "@/components/AddClientDialog";
+import { ImportEntryButton } from "@/components/import/ImportEntryButton";
 import { ClientList } from "@/components/ClientList";
 import { Pagination } from "@/components/Pagination";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,10 @@ export default async function ClientsPage({
     <div className="px-8 py-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-primary">Clients</h1>
-        <AddClientDialog />
+        <div className="flex gap-2">
+          <ImportEntryButton target="clients" />
+          <AddClientDialog />
+        </div>
       </div>
 
       <form className="mb-4 max-w-md">
