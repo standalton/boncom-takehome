@@ -21,9 +21,17 @@ type Props = {
   align?: "left" | "right";
   /** Direction applied on the first click of an inactive column. */
   firstDir?: "asc" | "desc";
+  /** Extra classes for the header cell, e.g. a column width. */
+  className?: string;
 };
 
-export function SortableHead({ column, label, align = "left", firstDir = "asc" }: Props) {
+export function SortableHead({
+  column,
+  label,
+  align = "left",
+  firstDir = "asc",
+  className,
+}: Props) {
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -40,7 +48,7 @@ export function SortableHead({ column, label, align = "left", firstDir = "asc" }
   const Icon = !active ? ArrowUpDown : currentAsc ? ArrowUp : ArrowDown;
 
   return (
-    <TableHead className={align === "right" ? "text-right" : undefined}>
+    <TableHead className={[align === "right" ? "text-right" : "", className ?? ""].join(" ").trim() || undefined}>
       <Link
         href={`${pathname}?${next.toString()}`}
         aria-label={`Sort by ${label}, ${nextDir === "asc" ? "ascending" : "descending"}`}

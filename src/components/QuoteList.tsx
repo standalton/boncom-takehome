@@ -10,6 +10,7 @@
 
 import { useRouter } from "next/navigation";
 import { formatCents } from "@/lib/money";
+import { statusMeta } from "@/lib/status-meta";
 import type { QuoteStatus } from "@/lib/types";
 import { DeleteQuoteButton } from "@/components/DeleteQuoteButton";
 import { SortableHead } from "@/components/SortableHead";
@@ -22,14 +23,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const statusStyles: Record<QuoteStatus, string> = {
-  draft: "bg-muted text-muted-foreground",
-  finalized: "bg-amber-100 text-amber-800",
-  sent: "bg-blue-100 text-blue-800",
-  accepted: "bg-green-100 text-green-800",
-  paid: "bg-emerald-600 text-white",
-  declined: "bg-red-100 text-red-800",
-};
+// Locale/timezone-aware, so the rendered value depends on the viewer's zone.
+// Both are wrapped in suppressHydrationWarning at the call site because the
+// server (UTC) and client can legitimately format the same instant differently.
+function formatUpdatedDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatUpdatedTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 export type QuoteListRow = {
   id: string;
@@ -48,11 +58,22 @@ export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <SortableHead column="number" label="Number" />
+            <SortableHead column="number" label="Number" className="w-[14%]" />
             <TableHead>Client</TableHead>
-            <SortableHead column="status" label="Status" />
-            <SortableHead column="total_cents" label="Total" align="right" firstDir="desc" />
-            <SortableHead column="updated_at" label="Updated" firstDir="desc" />
+            <SortableHead column="status" label="Status" className="w-[15%]" />
+            <SortableHead
+              column="total_cents"
+              label="Total"
+              align="right"
+              firstDir="desc"
+              className="w-[15%] pr-12"
+            />
+            <SortableHead
+              column="updated_at"
+              label="Updated"
+              firstDir="desc"
+              className="w-[18%] pl-8"
+            />
             <TableHead className="w-10">
               <span className="sr-only">Actions</span>
             </TableHead>
@@ -63,22 +84,27 @@ export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
             <TableRow
               key={quote.id}
               onClick={() => router.push(`/quotes/${quote.id}`)}
-              className="cursor-pointer select-none transition-colors hover:bg-muted/50 [&_td]:cursor-pointer"
+              className="cursor-pointer select-none transition-all duration-150 hover:bg-accent active:scale-[0.99] active:bg-primary/10 [&_td]:cursor-pointer"
             >
               <TableCell className="font-medium text-primary">{quote.number}</TableCell>
               <TableCell>{quote.clients?.company ?? "—"}</TableCell>
               <TableCell>
                 <span
-                  className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusStyles[quote.status]}`}
+                  className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusMeta[quote.status].chip}`}
                 >
                   {quote.status}
                 </span>
               </TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-right tabular-nums pr-12">
                 {formatCents(quote.total_cents)}
               </TableCell>
-              <TableCell className="text-muted-foreground">
-                {new Date(quote.updated_at).toISOString().slice(0, 10)}
+              <TableCell className="pl-8">
+                <div className="text-sm text-foreground tabular-nums" suppressHydrationWarning>
+                  {formatUpdatedDate(quote.updated_at)}
+                </div>
+                <div className="text-xs text-muted-foreground tabular-nums" suppressHydrationWarning>
+                  {formatUpdatedTime(quote.updated_at)}
+                </div>
               </TableCell>
               <TableCell className="text-right">
                 <DeleteQuoteButton
