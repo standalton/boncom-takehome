@@ -33,6 +33,12 @@ pnpm-debug.log*
 # Testing / coverage
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
+.playwright-mcp/
+
+# Supabase CLI local state
+supabase/.temp/
 
 # Next.js TypeScript
 next-env.d.ts
