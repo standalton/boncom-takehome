@@ -82,7 +82,7 @@ codebase grows. Format:_
 | Spreadsheet import (parse, resolve, preview logic) | `src/lib/import/` |
 | Import server actions (parse/preview/commit) | `src/actions/import.ts` |
 | Import wizard UI + route | `src/components/import/`, `src/app/(app)/import/` |
-| Transactional import commit (SQL) | `supabase/migrations/0006_import_commit_rpc.sql` |
+| Transactional import commit (SQL) | `supabase/migrations/0006_import_commit_rpc.sql` (hardened in `0009_harden_import_commit.sql`: pinned `search_path`, execute limited to `authenticated`) |
 | RLS policies (per-command, shared workspace) | `supabase/migrations/0001_init.sql`, `0007_tighten_rls_policies.sql` |
 | Activity-log write helpers (record + diff) | `src/lib/quote-audit.ts` |
 | Server actions (mutations) | `src/actions/` (auth, clients, quotes, products) |
@@ -133,7 +133,7 @@ building something new, to avoid duplicating what already exists. Format:_
 | `SendQuoteDialog` | `src/components/SendQuoteDialog.tsx` | Confirm-send modal shown when a quote moves to "Sent". |
 | `QuoteEditor` | `src/components/QuoteEditor.tsx` | The core quote editor (editable number, live totals). |
 | `QuoteActivity` | `src/components/QuoteActivity.tsx` | Read-only history timeline of a quote's activity_log (shown in the actions-menu "View history" dialog). |
-| `Sidebar` / app shell | `src/components/app-shell/` | Authenticated nav shell. |
+| `AppShell` / `Sidebar` | `src/components/app-shell/` | Responsive authenticated nav shell: `AppShell` docks the `Sidebar` on desktop (md+) and, on mobile, hides it behind a top bar + slide-in drawer (closes on backdrop/Escape/route change). |
 | quote/client/auth actions | `src/actions/` | Server-side mutations with validation + audit. |
 | `parseCsv` / `parseXlsx` / `toTable` | `src/lib/import/parse.ts` | Spreadsheet file → `SheetTable` (string cells), CSV + XLSX behind one interface. |
 | `parseMoneyToCents` | `src/lib/import/parse-money.ts` | Strict currency→cents for import — errors on blank/non-numeric (unlike lenient `dollarsToCents`). |

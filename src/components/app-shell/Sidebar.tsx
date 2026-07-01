@@ -3,7 +3,8 @@
  *
  * What:        Left nav (Dashboard, Quotes, Clients, Products), the current
  *              user, and a logout button.
- * Where used:  The (app) layout shell.
+ * Where used:  AppShell — docked on desktop (md+) and reused inside the mobile
+ *              slide-in drawer, so it takes a `className` for width/visibility.
  * Notes:       Client component for active-link highlighting and the logout
  *              form action. The spreadsheet Import feature exists at /import but
  *              is intentionally not linked here (kept out of the demo path); see
@@ -25,11 +26,11 @@ const nav = [
   { href: "/products", label: "Products", icon: Package },
 ];
 
-export function Sidebar({ userName }: { userName: string }) {
+export function Sidebar({ userName, className }: { userName: string; className?: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r bg-sidebar">
+    <aside className={cn("flex w-60 shrink-0 flex-col border-r bg-sidebar", className)}>
       <div className="px-5 py-5">
         <Link
           href="/"

@@ -10,7 +10,7 @@
  */
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Sidebar } from "@/components/app-shell/Sidebar";
+import { AppShell } from "@/components/app-shell/AppShell";
 
 export default async function AppLayout({
   children,
@@ -28,12 +28,9 @@ export default async function AppLayout({
     .eq("id", claims.sub)
     .single();
 
-  // Fixed-height shell: the sidebar stays put (its footer pinned to the viewport)
-  // and only the main column scrolls.
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar userName={profile?.full_name ?? claims.email ?? "User"} />
-      <main className="flex-1 overflow-y-auto">{children}</main>
-    </div>
+    <AppShell userName={profile?.full_name ?? claims.email ?? "User"}>
+      {children}
+    </AppShell>
   );
 }
