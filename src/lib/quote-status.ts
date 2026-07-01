@@ -38,6 +38,14 @@ export function canTransition(from: QuoteStatus, to: QuoteStatus): boolean {
   return STATUS_TRANSITIONS[from].includes(to);
 }
 
+// The closed set of statuses, derived from the transition map so it never drifts
+// from the state machine. Used to validate an untrusted ?status= filter value.
+export const QUOTE_STATUSES = Object.keys(STATUS_TRANSITIONS) as QuoteStatus[];
+
+export function isQuoteStatus(value: string): value is QuoteStatus {
+  return (QUOTE_STATUSES as string[]).includes(value);
+}
+
 // The reverse map: every status from which a quote may legally become `to`.
 // Used to enforce a transition atomically in a conditional UPDATE
 // (`.in("status", statusesThatCanBecome(next))`).

@@ -4,6 +4,8 @@ import {
   canTransition,
   statusesThatCanBecome,
   STATUS_TRANSITIONS,
+  QUOTE_STATUSES,
+  isQuoteStatus,
 } from "./quote-status";
 import type { QuoteStatus } from "./types";
 
@@ -57,5 +59,19 @@ describe("statusesThatCanBecome", () => {
 
   it("only a draft can become finalized", () => {
     expect(statusesThatCanBecome("finalized")).toEqual(["draft"]);
+  });
+});
+
+describe("isQuoteStatus", () => {
+  it("lists all six statuses", () => {
+    expect([...QUOTE_STATUSES].sort()).toEqual([...ALL].sort());
+  });
+
+  it("accepts a real status", () => {
+    expect(isQuoteStatus("sent")).toBe(true);
+  });
+
+  it("rejects an unknown value", () => {
+    expect(isQuoteStatus("deleted")).toBe(false);
   });
 });
