@@ -7,6 +7,21 @@ spreadsheet workflow where formulas are rebuilt and tax math is checked by hand.
 
 Boncom take-home for the AI Solutions Manager role.
 
+## Live demo
+
+**→ https://kwik-quote.vercel.app**
+
+1. Open the link above.
+2. On the login screen, click **Sarah**, **Mike**, or **Alex** under
+   "Demo — one-tap sign in" for instant access (no typing needed). The password
+   field has a show/hide toggle if you enter credentials by hand.
+3. You land on the **Dashboard**. From the sidebar, browse **Quotes**,
+   **Clients**, and **Products**; open any quote (or hit **New quote**) to watch
+   the grand total update live as you edit line items, discounts, and tax.
+
+Prefer to type credentials? Use `sarah@kwikquote.app` (or `mike@kwikquote.app` /
+`alex@kwikquote.app`), password `Demo!2026` — all three share it.
+
 ## What's built
 
 - **Auth** — Supabase email/password with one-tap demo login for three seeded users.
@@ -20,11 +35,6 @@ Boncom take-home for the AI Solutions Manager role.
 - **Three-layer validation** — the same Zod rules enforced in the UI, in server
   actions, and by database CHECK constraints (e.g. no >100% discount).
 - **Audit trail** — every create/save/status-change is recorded per quote.
-
-## Demo accounts
-
-On the login screen, click **Sarah**, **Mike**, or **Alex** for one-tap sign-in.
-(Credentials, if you prefer: `sarah@kwikquote.app` / `Demo!2026`.)
 
 ## Getting started
 
