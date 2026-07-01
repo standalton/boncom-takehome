@@ -57,33 +57,23 @@ Prefer to type credentials? Use `sarah@kwikquote.app` (or `mike@kwikquote.app` /
 - **Three-layer validation** — the same Zod rules enforced in the UI, in server
   actions, and by database CHECK constraints (e.g. no >100% discount).
 
-## Running locally (optional)
+## Reviewing the code
 
-**To evaluate the app, just use the [live demo](#live-demo) above — no setup
-required.** Local setup is only needed for development, and requires your own
-Supabase backend (the app talks to Supabase for data and auth).
+**To use the app, just open the [live demo](#live-demo) — no setup required.**
+
+If you're reading the repo, these verify the engineering on a fresh clone with
+**no database or environment setup**:
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in your Supabase project URL + anon key
-npm run dev                  # http://localhost:3000
+npm test        # 150 unit + component tests (pricing, validation, PDF, inputs, …)
+npm run typecheck
+npm run build
 ```
 
-The full schema and demo data live in `supabase/` — `migrations/` (applied in
-order) and `seed.sql` (3 demo users + a catalog, clients, and ~75 quotes). With
-the [Supabase CLI](https://supabase.com/docs/guides/local-development) you can
-run `supabase db reset` against a local stack to apply both. Note the seed
-inserts Supabase Auth users, so it needs a Supabase database (local or hosted),
-not a plain Postgres.
-
-### Scripts
-
-```bash
-npm test            # unit + component tests (pricing, money, validation, PDF, inputs, …)
-npm run test:e2e    # Playwright end-to-end (core create -> save -> persist flow)
-npm run typecheck   # tsc --noEmit
-npm run build       # production build
-```
+Running the full app locally needs a Supabase backend; the schema and demo data
+live in `supabase/` (`migrations/` + `seed.sql`), and the end-to-end flow is
+covered by `npm run test:e2e` (Playwright).
 
 ## Tech stack
 
