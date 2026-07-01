@@ -29,6 +29,11 @@ export function FilterSelect({ param, options, allLabel, className }: Props) {
   const params = useSearchParams();
   const current = params.get(param) ?? ALL;
 
+  // The "All" entry is a real option so the trigger resolves its label (base-ui
+  // Select needs `items` to map the selected value to display text — otherwise
+  // it renders the raw value, e.g. the "__all__" sentinel).
+  const items = [{ value: ALL, label: allLabel }, ...options];
+
   function onChange(value: string | null) {
     const next = new URLSearchParams(params);
     if (!value || value === ALL) next.delete(param);
@@ -38,13 +43,12 @@ export function FilterSelect({ param, options, allLabel, className }: Props) {
   }
 
   return (
-    <Select value={current} onValueChange={onChange}>
+    <Select items={items} value={current} onValueChange={onChange}>
       <SelectTrigger className={className} aria-label={allLabel}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value={ALL}>{allLabel}</SelectItem>
-        {options.map((o) => (
+        {items.map((o) => (
           <SelectItem key={o.value} value={o.value}>
             {o.label}
           </SelectItem>
