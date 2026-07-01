@@ -71,17 +71,7 @@ export default async function QuotesPage({
         </div>
       ) : quotes.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-          {q || status ? (
-            "No quotes match your search."
-          ) : (
-            <>
-              No quotes yet. Create your first one, or{" "}
-              <Link href="/import?target=quotes" className="text-primary underline underline-offset-4">
-                import a spreadsheet
-              </Link>
-              .
-            </>
-          )}
+          {q || status ? "No quotes match your search." : "No quotes yet. Create your first one."}
         </div>
       ) : (
         <>

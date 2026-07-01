@@ -2,8 +2,10 @@
  * import/page.tsx — the spreadsheet import wizard route.
  *
  * What:        Hosts the client-side ImportWizard. An optional ?target= query
- *              (from a list page's Import button) pre-selects the entity.
- * Where used:  /import, linked from the Quotes/Clients/Products list headers.
+ *              pre-selects the entity.
+ * Where used:  The /import route. Reachable by direct URL only — intentionally
+ *              not linked in the nav, to keep it out of the live demo path. The
+ *              feature is complete and tested; this just gates its visibility.
  */
 import { ImportWizard } from "@/components/import/ImportWizard";
 import type { ImportTarget } from "@/lib/import/types";

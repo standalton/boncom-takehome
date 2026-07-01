@@ -1,17 +1,19 @@
 /**
  * Sidebar.tsx — primary navigation for the authenticated app.
  *
- * What:        Left nav (Dashboard, Quotes, Clients, Products, Import), the
- *              current user, and a logout button.
+ * What:        Left nav (Dashboard, Quotes, Clients, Products), the current
+ *              user, and a logout button.
  * Where used:  The (app) layout shell.
  * Notes:       Client component for active-link highlighting and the logout
- *              form action.
+ *              form action. The spreadsheet Import feature exists at /import but
+ *              is intentionally not linked here (kept out of the demo path); see
+ *              src/components/import and docs/superpowers/specs.
  */
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Users, Package, Upload, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Package, LogOut } from "lucide-react";
 import { signOut } from "@/actions/auth";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +22,6 @@ const nav = [
   { href: "/quotes", label: "Quotes", icon: FileText },
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/products", label: "Products", icon: Package },
-  { href: "/import", label: "Import", icon: Upload },
 ];
 
 export function Sidebar({ userName }: { userName: string }) {

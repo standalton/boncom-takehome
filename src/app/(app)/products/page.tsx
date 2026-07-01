@@ -4,7 +4,6 @@
  * What:        Lists catalog products with an "Add product" action.
  * Where used:  The /products route.
  */
-import Link from "next/link";
 import { listProducts, listProductUnitsInUse } from "@/actions/products";
 import { formatCents } from "@/lib/money";
 import { formatUnit } from "@/lib/product-units";
@@ -73,20 +72,9 @@ export default async function ProductsPage({
         </div>
       ) : products.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-          {q || unit ? (
-            "No products match your search."
-          ) : (
-            <>
-              No products yet. Add the services you offer, or{" "}
-              <Link
-                href="/import?target=products"
-                className="text-primary underline underline-offset-4"
-              >
-                import a spreadsheet
-              </Link>
-              .
-            </>
-          )}
+          {q || unit
+            ? "No products match your search."
+            : "No products yet. Add the services you offer to reuse them in quotes."}
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border">
