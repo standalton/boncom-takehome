@@ -10,7 +10,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { isProductUnit } from "@/lib/product-units";
+import { isProductUnit, PRODUCT_UNITS } from "@/lib/product-units";
 import { pageRange } from "@/lib/pagination";
 import { applySort, PRODUCT_SORT_DEFAULT, type SortSpec } from "@/lib/list-params";
 import type { Product } from "@/lib/types";
@@ -56,6 +56,19 @@ export async function listProducts(
   const { data, error, count } = await query;
   if (error) return { ok: false as const, error: error.message };
   return { ok: true as const, data: data as Product[], count: count ?? data.length };
+}
+
+/**
+ * The distinct units that at least one active product currently uses, as
+ * {value,label} pairs in canonical order. Drives the unit filter so it only
+ * offers real choices.
+ */
+export async function listProductUnitsInUse() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("products").select("unit").eq("active", true);
+  if (error) return { ok: false as const, error: error.message };
+  const present = new Set((data ?? []).map((r) => r.unit).filter(Boolean));
+  return { ok: true as const, data: PRODUCT_UNITS.filter((u) => present.has(u.value)) };
 }
 
 export async function createProduct(input: unknown) {

@@ -12,7 +12,8 @@ import { createClient } from "@/lib/supabase/server";
 import { toActivityEntries } from "@/lib/activity";
 import { pageRange } from "@/lib/pagination";
 import { applySort, QUOTE_SORT_DEFAULT, type SortSpec } from "@/lib/list-params";
-import { isQuoteStatus } from "@/lib/quote-status";
+import { isQuoteStatus, QUOTE_STATUSES } from "@/lib/quote-status";
+import type { QuoteStatus } from "@/lib/types";
 
 export async function listQuotes(
   search?: string,
@@ -39,6 +40,18 @@ export async function listQuotes(
   const { data, error, count } = await query;
   if (error) return { ok: false as const, error: error.message };
   return { ok: true as const, data: data ?? [], count: count ?? (data?.length ?? 0) };
+}
+
+/**
+ * The distinct statuses that at least one quote currently has, in canonical
+ * lifecycle order. Drives the status filter so it only offers real choices.
+ */
+export async function listQuoteStatusesInUse() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("quotes").select("status");
+  if (error) return { ok: false as const, error: error.message };
+  const present = new Set((data ?? []).map((r) => r.status as QuoteStatus));
+  return { ok: true as const, data: QUOTE_STATUSES.filter((s) => present.has(s)) };
 }
 
 export async function listQuotesByClient(clientId: string) {

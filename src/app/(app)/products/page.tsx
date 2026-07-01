@@ -4,9 +4,9 @@
  * What:        Lists catalog products with an "Add product" action.
  * Where used:  The /products route.
  */
-import { listProducts } from "@/actions/products";
+import { listProducts, listProductUnitsInUse } from "@/actions/products";
 import { formatCents } from "@/lib/money";
-import { formatUnit, PRODUCT_UNITS } from "@/lib/product-units";
+import { formatUnit } from "@/lib/product-units";
 import { parsePage } from "@/lib/pagination";
 import { parseSort, PRODUCT_SORTS, PRODUCT_SORT_DEFAULT } from "@/lib/list-params";
 import { AddProductDialog } from "@/components/AddProductDialog";
@@ -33,9 +33,14 @@ export default async function ProductsPage({
   const { q, page: pageParam, sort, dir, unit } = await searchParams;
   const page = parsePage(pageParam);
   const sortSpec = parseSort(sort, dir, PRODUCT_SORTS, PRODUCT_SORT_DEFAULT);
-  const res = await listProducts(q, page, sortSpec, unit);
+  const [res, unitsRes] = await Promise.all([
+    listProducts(q, page, sortSpec, unit),
+    listProductUnitsInUse(),
+  ]);
   const products = res.ok ? res.data : [];
   const total = res.ok ? res.count : 0;
+  // Only offer units that some active product actually uses.
+  const unitOptions = unitsRes.ok ? unitsRes.data.map((u) => ({ value: u.value, label: u.label })) : [];
 
   return (
     <div className="px-8 py-6">
@@ -55,12 +60,14 @@ export default async function ProductsPage({
           {dir && <input type="hidden" name="dir" value={dir} />}
           {unit && <input type="hidden" name="unit" value={unit} />}
         </form>
-        <FilterSelect
-          param="unit"
-          options={PRODUCT_UNITS.map((u) => ({ value: u.value, label: u.label }))}
-          allLabel="All units"
-          className="w-44"
-        />
+        {unitOptions.length > 0 && (
+          <FilterSelect
+            param="unit"
+            options={unitOptions}
+            allLabel="All units"
+            className="w-44"
+          />
+        )}
       </div>
 
       {!res.ok ? (

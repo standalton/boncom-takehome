@@ -7,10 +7,9 @@
  */
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { listQuotes } from "@/actions/quote-queries";
+import { listQuotes, listQuoteStatusesInUse } from "@/actions/quote-queries";
 import { parsePage } from "@/lib/pagination";
 import { parseSort, QUOTE_SORTS, QUOTE_SORT_DEFAULT } from "@/lib/list-params";
-import { QUOTE_STATUSES } from "@/lib/quote-status";
 import { statusMeta } from "@/lib/status-meta";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,8 +17,6 @@ import { FilterSelect } from "@/components/FilterSelect";
 import { Pagination } from "@/components/Pagination";
 import { QuoteList, type QuoteListRow } from "@/components/QuoteList";
 import { ImportEntryButton } from "@/components/import/ImportEntryButton";
-
-const statusOptions = QUOTE_STATUSES.map((s) => ({ value: s, label: statusMeta[s].label }));
 
 export default async function QuotesPage({
   searchParams,
@@ -29,9 +26,17 @@ export default async function QuotesPage({
   const { q, page: pageParam, sort, dir, status } = await searchParams;
   const page = parsePage(pageParam);
   const sortSpec = parseSort(sort, dir, QUOTE_SORTS, QUOTE_SORT_DEFAULT);
-  const res = await listQuotes(q, page, sortSpec, status);
+  const [res, statusesRes] = await Promise.all([
+    listQuotes(q, page, sortSpec, status),
+    listQuoteStatusesInUse(),
+  ]);
   const quotes = (res.ok ? res.data : []) as unknown as QuoteListRow[];
   const total = res.ok ? res.count : 0;
+  // Only offer statuses that some quote actually has.
+  const statusOptions = (statusesRes.ok ? statusesRes.data : []).map((s) => ({
+    value: s,
+    label: statusMeta[s].label,
+  }));
 
   return (
     <div className="px-8 py-6">
@@ -54,12 +59,14 @@ export default async function QuotesPage({
           {dir && <input type="hidden" name="dir" value={dir} />}
           {status && <input type="hidden" name="status" value={status} />}
         </form>
-        <FilterSelect
-          param="status"
-          options={statusOptions}
-          allLabel="All statuses"
-          className="w-44"
-        />
+        {statusOptions.length > 0 && (
+          <FilterSelect
+            param="status"
+            options={statusOptions}
+            allLabel="All statuses"
+            className="w-44"
+          />
+        )}
       </div>
 
       {!res.ok ? (
