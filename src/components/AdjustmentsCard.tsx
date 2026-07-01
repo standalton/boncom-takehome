@@ -26,6 +26,7 @@ type Props = {
   taxRatePercent: number;
   discountCents: number;
   taxCents: number;
+  error?: string | null;
   onDiscountChange: (type: DiscountType, value: number) => void;
   onTaxChange: (value: number) => void;
 };
@@ -36,6 +37,7 @@ export function AdjustmentsCard({
   taxRatePercent,
   discountCents,
   taxCents,
+  error,
   onDiscountChange,
   onTaxChange,
 }: Props) {
@@ -74,10 +76,14 @@ export function AdjustmentsCard({
             />
           )}
         </div>
-        {discountCents > 0 && (
-          <p className="text-xs tabular-nums text-muted-foreground">
-            −{formatCents(discountCents)} applied
-          </p>
+        {error ? (
+          <p className="text-xs font-medium text-destructive">{error}</p>
+        ) : (
+          discountCents > 0 && (
+            <p className="text-xs tabular-nums text-muted-foreground">
+              −{formatCents(discountCents)} applied
+            </p>
+          )
         )}
       </div>
 

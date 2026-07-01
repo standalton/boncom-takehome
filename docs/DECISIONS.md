@@ -6,6 +6,20 @@ specifically about *the decisions behind the build*; this is where they live.
 
 Format: newest first.
 
+## 2026-06-30 — Discount validation + already-sent handling
+
+- **Decision:** A fixed order discount larger than the subtotal is now rejected
+  (shared `orderDiscountExceedsSubtotal` in lib/pricing) rather than silently
+  clamped — surfaced live in the editor (inline error + Save/Finalize disabled)
+  and re-checked authoritatively in saveQuote. Percentage caps (≤100%) stay in
+  the Zod schema, with a live mirror for the order-level percent.
+- **Why:** Silently clamping changes the number the user typed. The rule lives in
+  one shared helper so the editor and server can't disagree.
+- **Already sent:** A post-send quote shows an informational banner ("Sent to
+  {client}"), and re-sending routes through the send dialog with a warning +
+  confirm ("already sent … will notify the client again") instead of firing
+  silently. Editing stays locked server-side (draft-only).
+
 ## 2026-06-30 — Enforce the quote lifecycle server-side
 
 - **Decision:** The quote lock is enforced in the server actions, not just the

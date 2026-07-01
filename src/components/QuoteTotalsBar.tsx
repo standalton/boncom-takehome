@@ -9,6 +9,7 @@
  */
 "use client";
 
+import type { ReactNode } from "react";
 import { Send, Download, CheckCircle2 } from "lucide-react";
 import { formatCents } from "@/lib/money";
 import { helpText } from "@/lib/help-text";
@@ -24,6 +25,9 @@ type Props = {
   totalCents: number;
   saving: boolean;
   statusPending: boolean;
+  finalizeDisabled?: boolean;
+  // A status strip pinned directly above the totals row (part of the sticky footer).
+  banner?: ReactNode;
   onFinalize: () => void;
   onExport: () => void;
   onSend: () => void;
@@ -49,13 +53,16 @@ export function QuoteTotalsBar({
   totalCents,
   saving,
   statusPending,
+  finalizeDisabled,
+  banner,
   onFinalize,
   onExport,
   onSend,
 }: Props) {
   return (
-    <div className="fixed right-0 bottom-0 left-60 z-20">
-      <div className="border-t bg-card shadow-[0_-10px_30px_-16px_rgba(0,32,66,0.28)]">
+    <div className="fixed right-0 bottom-0 left-60 z-20 shadow-[0_-10px_30px_-16px_rgba(0,32,66,0.28)]">
+      {banner}
+      <div className="border-t bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-6 px-8 pt-3.5 pb-5">
           <dl className="hidden items-center gap-7 sm:flex">
             <Stat label="Subtotal" value={formatCents(subtotalCents)} />
@@ -78,7 +85,13 @@ export function QuoteTotalsBar({
             {status === "draft" && (
             <Tooltip>
               <TooltipTrigger
-                render={<Button size="lg" disabled={saving || statusPending} onClick={onFinalize} />}
+                render={
+                  <Button
+                    size="lg"
+                    disabled={saving || statusPending || finalizeDisabled}
+                    onClick={onFinalize}
+                  />
+                }
               >
                 <CheckCircle2 className="size-4" />
                 Finalize

@@ -50,6 +50,7 @@ type Props = {
   taxRatePercent: number;
   discountCents: number;
   taxCents: number;
+  discountError?: string | null;
   onDiscountChange: (type: DiscountType, value: number) => void;
   onTaxChange: (value: number) => void;
   notes: string;
@@ -72,6 +73,7 @@ export function QuoteEditorForm({
   taxRatePercent,
   discountCents,
   taxCents,
+  discountError,
   onDiscountChange,
   onTaxChange,
   notes,
@@ -135,6 +137,7 @@ export function QuoteEditorForm({
         taxRatePercent={taxRatePercent}
         discountCents={discountCents}
         taxCents={taxCents}
+        error={discountError}
         onDiscountChange={onDiscountChange}
         onTaxChange={onTaxChange}
       />

@@ -1,8 +1,8 @@
 /**
  * QuoteList.tsx — the dashboard quote table.
  *
- * What:        Renders quotes as fully clickable rows (the whole row navigates,
- *              with a hover highlight), with status badges and totals.
+ * What:        Renders quotes as fully clickable rows (the whole row opens the
+ *              quote in a new tab), with status badges and totals.
  * Where used:  The dashboard page.
  * Notes:       Client component so rows can navigate on click.
  */
@@ -61,7 +61,7 @@ export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
           {quotes.map((quote) => (
             <TableRow
               key={quote.id}
-              onClick={() => router.push(`/quotes/${quote.id}`)}
+              onClick={() => window.open(`/quotes/${quote.id}`, "_blank", "noopener,noreferrer")}
               className="cursor-pointer select-none transition-colors hover:bg-muted/50 [&_td]:cursor-pointer"
             >
               <TableCell className="font-medium text-primary">{quote.number}</TableCell>

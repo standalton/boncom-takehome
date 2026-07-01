@@ -49,6 +49,20 @@ function applyDiscount(baseCents: number, type: DiscountType, value: number): nu
   return 0;
 }
 
+/**
+ * True when a fixed order discount is larger than the subtotal it applies to.
+ * computeTotals would silently clamp such a discount; callers use this to reject
+ * it instead so the figure the user entered isn't quietly changed. Shared by the
+ * editor (live) and saveQuote (authoritative) so the rule can't diverge.
+ */
+export function orderDiscountExceedsSubtotal(
+  discountType: DiscountType,
+  discountValue: number,
+  subtotalCents: number,
+): boolean {
+  return discountType === "fixed" && Math.round(discountValue) > subtotalCents;
+}
+
 export function computeTotals(input: PricingInput): PricingResult {
   const lineNetsCents = input.lineItems.map((li) => {
     const gross = clampNonNegative(Math.round(li.quantity * li.rateCents));

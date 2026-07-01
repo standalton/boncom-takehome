@@ -1,9 +1,11 @@
 /**
  * DateField.tsx — a clean date control.
  *
- * What:        Shows the chosen date as a formatted button ("Jun 30, 2026") or a
- *              muted "Set date". Clicking opens a custom calendar popover (not
- *              the native date picker). A small clear button removes the date.
+ * What:        Shows the chosen date as a formatted button ("Jun 30, 2026"), a
+ *              muted "Set date" call-to-action when editable, or "No date set"
+ *              when there's no date and the field is locked. Clicking opens a
+ *              custom calendar popover (not the native date picker). A small clear
+ *              button removes the date.
  * Where used:  The quote editor's "Valid until" field.
  * Notes:       Value is an ISO date string ("YYYY-MM-DD") or "". Parsed at local
  *              midnight so the displayed day can't drift across time zones.
@@ -41,7 +43,9 @@ export function DateField({ value, onChange, disabled }: Props) {
           {value ? (
             <span className="text-foreground tabular-nums">{formatPretty(value)}</span>
           ) : (
-            <span className="text-muted-foreground">Set date</span>
+            // "Set date" is a call-to-action; when the field can't be edited,
+            // state the fact instead so a locked quote reads clearly.
+            <span className="text-muted-foreground">{disabled ? "No date set" : "Set date"}</span>
           )}
         </Popover.Trigger>
         <Popover.Portal>

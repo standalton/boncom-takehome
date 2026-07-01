@@ -9,7 +9,7 @@
  */
 "use client";
 
-import { Mail, Phone, Building2, User, Download } from "lucide-react";
+import { Mail, Phone, Building2, User, Download, AlertTriangle } from "lucide-react";
 import type { ClientOption } from "@/lib/client-option";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ type Props = {
   quoteNumber: string;
   client: ClientOption | undefined;
   pending: boolean;
+  resend?: boolean;
   onConfirm: () => void;
   onExport: () => void;
 };
@@ -37,6 +38,7 @@ export function SendQuoteDialog({
   quoteNumber,
   client,
   pending,
+  resend,
   onConfirm,
   onExport,
 }: Props) {
@@ -44,11 +46,18 @@ export function SendQuoteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Send {quoteNumber}?</DialogTitle>
+          <DialogTitle>{resend ? `Re-send ${quoteNumber}?` : `Send ${quoteNumber}?`}</DialogTitle>
           <DialogDescription>
             This will mark the quote as sent and notify the recipient below.
           </DialogDescription>
         </DialogHeader>
+
+        {resend && (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <span>This quote has already been sent. Sending again will notify the client a second time.</span>
+          </div>
+        )}
 
         <div className="rounded-lg border bg-muted/30 p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -91,7 +100,7 @@ export function SendQuoteDialog({
             </Button>
             <Button onClick={onConfirm} disabled={pending || !client}>
               <Mail className="size-4" />
-              {pending ? "Sending…" : "Send quote"}
+              {pending ? "Sending…" : resend ? "Re-send quote" : "Send quote"}
             </Button>
           </div>
         </DialogFooter>

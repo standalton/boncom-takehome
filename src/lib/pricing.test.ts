@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeTotals, type PricingInput } from "./pricing";
+import { computeTotals, orderDiscountExceedsSubtotal, type PricingInput } from "./pricing";
 
 const line = (
   quantity: number,
@@ -7,6 +7,19 @@ const line = (
   discountType: "none" | "percent" | "fixed" = "none",
   discountValue = 0,
 ) => ({ quantity, rateCents, discountType, discountValue });
+
+describe("orderDiscountExceedsSubtotal", () => {
+  it("flags a fixed discount larger than the subtotal", () => {
+    expect(orderDiscountExceedsSubtotal("fixed", 5001, 5000)).toBe(true);
+  });
+  it("allows a fixed discount equal to the subtotal", () => {
+    expect(orderDiscountExceedsSubtotal("fixed", 5000, 5000)).toBe(false);
+  });
+  it("never flags percent or none discounts (they can't exceed the base)", () => {
+    expect(orderDiscountExceedsSubtotal("percent", 100, 5000)).toBe(false);
+    expect(orderDiscountExceedsSubtotal("none", 999999, 5000)).toBe(false);
+  });
+});
 
 describe("computeTotals", () => {
   it("computes a simple subtotal with no discounts or tax", () => {

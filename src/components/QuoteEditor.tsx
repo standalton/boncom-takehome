@@ -8,6 +8,9 @@
  */
 "use client";
 
+import { Fragment } from "react";
+import Link from "next/link";
+import { Send, AlertTriangle } from "lucide-react";
 import { useQuoteEditor, type QuoteEditorInit } from "@/lib/use-quote-editor";
 import { SendQuoteDialog } from "@/components/SendQuoteDialog";
 import { QuoteEditorHeader } from "@/components/QuoteEditorHeader";
@@ -21,6 +24,43 @@ export type QuoteEditorProps = QuoteEditorInit & { activity: ActivityEntry[] };
 export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
   const q = useQuoteEditor(props);
   const { totals } = q;
+
+  // A status strip that docks directly above the sticky totals bar (part of the
+  // fixed footer, always visible) — a duplicate-send warning on a draft, or a
+  // sent-and-locked notice once the quote has gone out.
+  const footerBanner =
+    q.status === "draft" && q.sentSiblings.length > 0 ? (
+      <div className="border-t border-amber-200 bg-amber-50 text-amber-800">
+        <div className="flex items-center justify-center gap-2 px-8 py-2.5 text-center text-sm">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          <span>
+            {q.selectedClient?.company ?? "This client"}
+            {" already has a quote that's been sent: "}
+            {q.sentSiblings.map((s, i) => (
+              <Fragment key={s.id}>
+                {i > 0 && ", "}
+                <Link
+                  href={`/quotes/${s.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium underline underline-offset-2 hover:text-amber-900"
+                >
+                  {s.number}
+                </Link>
+              </Fragment>
+            ))}
+            {". Make sure you're not sending a duplicate."}
+          </span>
+        </div>
+      </div>
+    ) : q.alreadySent ? (
+      <div className="border-t border-blue-200 bg-blue-50 text-blue-800">
+        <div className="flex items-center justify-center gap-2 px-8 py-2.5 text-center text-sm">
+          <Send className="size-4 shrink-0" />
+          {`This quote was sent to ${q.selectedClient?.company ?? "the client"} and can no longer be edited.`}
+        </div>
+      </div>
+    ) : null;
 
   return (
     <>
@@ -36,9 +76,11 @@ export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
           lastSavedAt={q.lastSavedAt}
           validUntil={q.validUntil}
           onValidUntilChange={q.changeValidUntil}
-          onStatusSelect={q.applyStatus}
+          // Re-sending an already-sent quote routes through the confirm dialog.
+          onStatusSelect={(s) => (s === "sent" ? q.setSendOpen(true) : q.applyStatus(s))}
           statusPending={q.statusPending}
           saving={q.saving}
+          saveDisabled={!!q.validationError}
           onSave={q.save}
           onEdit={() => q.applyStatus("draft")}
         />
@@ -76,6 +118,7 @@ export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
             taxRatePercent={q.taxRatePercent}
             discountCents={totals.discountCents}
             taxCents={totals.taxCents}
+            discountError={q.validationError}
             onDiscountChange={q.changeDiscount}
             onTaxChange={q.changeTax}
             notes={q.notes}
@@ -92,6 +135,8 @@ export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
         totalCents={totals.totalCents}
         saving={q.saving}
         statusPending={q.statusPending}
+        finalizeDisabled={!!q.validationError}
+        banner={footerBanner}
         onFinalize={q.finalize}
         onExport={q.exportPdf}
         onSend={() => q.setSendOpen(true)}
@@ -103,6 +148,7 @@ export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
         quoteNumber={props.number}
         client={q.selectedClient}
         pending={q.statusPending}
+        resend={q.alreadySent}
         onConfirm={() => q.applyStatus("sent", () => q.setSendOpen(false))}
         onExport={q.exportPdf}
       />

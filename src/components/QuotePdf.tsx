@@ -107,7 +107,7 @@ export function QuotePdf({ data }: { data: QuoteExportData }) {
             </View>
             <View style={styles.metaPair}>
               <Text style={styles.metaKey}>Valid until</Text>
-              <Text>{data.validUntil || "—"}</Text>
+              <Text>{data.validUntil || "No expiry"}</Text>
             </View>
           </View>
         </View>

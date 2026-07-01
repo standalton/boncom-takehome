@@ -20,7 +20,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { computeTotals } from "@/lib/pricing";
+import { computeTotals, orderDiscountExceedsSubtotal } from "@/lib/pricing";
 import { quoteSchema } from "@/lib/validation";
 import { statusesThatCanBecome } from "@/lib/quote-status";
 import { recordActivity, snapshotChanges, type PrevQuoteRow } from "@/lib/quote-audit";
@@ -59,6 +59,13 @@ export async function saveQuote(id: string, input: unknown) {
     orderDiscountValue: q.orderDiscountValue,
     taxRatePercent: q.taxRatePercent,
   });
+
+  // A fixed order discount larger than the subtotal would be silently clamped by
+  // the pricing layer; reject it instead so the figure isn't quietly changed.
+  // (Percentage caps are enforced in the Zod schema.)
+  if (orderDiscountExceedsSubtotal(q.orderDiscountType, q.orderDiscountValue, totals.subtotalCents)) {
+    return { ok: false as const, error: "The order discount can't exceed the subtotal." };
+  }
 
   const supabase = await createClient();
   const {

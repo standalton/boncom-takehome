@@ -35,6 +35,7 @@ type Props = {
   onStatusSelect: (status: QuoteStatus) => void;
   statusPending: boolean;
   saving: boolean;
+  saveDisabled?: boolean;
   onSave: () => void;
   onEdit: () => void;
 };
@@ -53,6 +54,7 @@ export function QuoteEditorHeader({
   onStatusSelect,
   statusPending,
   saving,
+  saveDisabled,
   onSave,
   onEdit,
 }: Props) {
@@ -102,16 +104,18 @@ export function QuoteEditorHeader({
           <DateField value={validUntil} disabled={locked} onChange={onValidUntilChange} />
         </div>
         <div className="flex items-center gap-2 self-end">
-          {locked ? (
+          {/* Draft can be saved; finalized can be reverted to draft to edit; once
+              sent, the quote is a committed record (no Save/Edit) — duplicate it. */}
+          {status === "draft" ? (
+            <Button onClick={onSave} disabled={saving || saveDisabled} className="h-9 min-w-20">
+              {saving ? "Saving…" : "Save"}
+            </Button>
+          ) : status === "finalized" ? (
             <Button variant="outline" onClick={onEdit} disabled={statusPending} className="h-9 min-w-20">
               <Pencil className="size-4" />
               Edit
             </Button>
-          ) : (
-            <Button onClick={onSave} disabled={saving} className="h-9 min-w-20">
-              {saving ? "Saving…" : "Save"}
-            </Button>
-          )}
+          ) : null}
           <QuoteActionsMenu id={id} number={number} activity={activity} />
         </div>
       </div>
