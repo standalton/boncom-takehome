@@ -22,9 +22,12 @@ type MoneyInputProps = {
   // When set, the field renders in its invalid (red) state. The message text is
   // rendered by the parent, next to the field.
   error?: string;
+  // Id of the parent-rendered error message, linked via aria-describedby so a
+  // screen reader reads the reason, not just "invalid".
+  errorId?: string;
 } & Omit<React.ComponentProps<typeof Input>, "value" | "onChange" | "type">;
 
-export function MoneyInput({ valueCents, onChangeCents, className, error, ...props }: MoneyInputProps) {
+export function MoneyInput({ valueCents, onChangeCents, className, error, errorId, ...props }: MoneyInputProps) {
   const [text, setText] = useState(valueCents ? (valueCents / 100).toString() : "");
   return (
     <div className="relative">
@@ -36,6 +39,7 @@ export function MoneyInput({ valueCents, onChangeCents, className, error, ...pro
         className={cn("pl-6", className)}
         value={text}
         aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
         {...selectAllOnFocus}
         onChange={(e) => {
           setText(e.target.value);

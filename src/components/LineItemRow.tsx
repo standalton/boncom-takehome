@@ -10,6 +10,7 @@
  */
 "use client";
 
+import { useId } from "react";
 import { Trash2, X } from "lucide-react";
 import { formatCents } from "@/lib/money";
 import type { DiscountType } from "@/lib/types";
@@ -59,6 +60,10 @@ export function LineItemRow({
   onRemove,
 }: Props) {
   const hasDiscount = discountType !== "none";
+  // Stable per-row base so each field's error message has a unique id that its
+  // input can point at via aria-describedby.
+  const rowId = useId();
+  const errorId = (field: keyof LineFieldErrors) => `${rowId}-${field}`;
   // Keyed by field name (not message text) so identical messages can't collide.
   const messages = (["description", "quantity", "rateCents", "discountValue"] as const).flatMap((field) =>
     errors[field] ? [{ field, message: errors[field]! }] : [],
@@ -87,6 +92,7 @@ export function LineItemRow({
           className="h-9 flex-1 text-[15px] font-medium placeholder:font-normal placeholder:text-muted-foreground/60"
           value={description}
           aria-invalid={errors.description ? true : undefined}
+          aria-describedby={errors.description ? errorId("description") : undefined}
           onChange={(e) => onChange({ description: e.target.value })}
           onBlur={() => onFieldBlur?.("description")}
         />
@@ -110,6 +116,7 @@ export function LineItemRow({
             value={quantity}
             placeholder="1"
             error={errors.quantity}
+            errorId={errorId("quantity")}
             onChangeNumber={(n) => onChange({ quantity: n })}
             onBlur={() => onFieldBlur?.("quantity")}
           />
@@ -122,6 +129,7 @@ export function LineItemRow({
             className="h-8 w-28 text-sm"
             valueCents={rateCents}
             error={errors.rateCents}
+            errorId={errorId("rateCents")}
             onChangeCents={(cents) => onChange({ rateCents: cents })}
             onBlur={() => onFieldBlur?.("rateCents")}
           />
@@ -153,6 +161,7 @@ export function LineItemRow({
                 value={discountValue}
                 placeholder="0"
                 error={errors.discountValue}
+                errorId={errorId("discountValue")}
                 onChangeNumber={(n) => onChange({ discountValue: n })}
                 onBlur={() => onFieldBlur?.("discountValue")}
               />
@@ -162,6 +171,7 @@ export function LineItemRow({
                 aria-label="Line discount amount"
                 valueCents={discountValue}
                 error={errors.discountValue}
+                errorId={errorId("discountValue")}
                 onChangeCents={(cents) => onChange({ discountValue: cents })}
                 onBlur={() => onFieldBlur?.("discountValue")}
               />
@@ -185,7 +195,7 @@ export function LineItemRow({
       {messages.length > 0 && (
         <ul className="mt-1.5 space-y-0.5 pl-0.5">
           {messages.map(({ field, message }) => (
-            <li key={field} className="text-xs font-medium text-destructive">
+            <li key={field} id={errorId(field)} className="text-xs font-medium text-destructive">
               {message}
             </li>
           ))}

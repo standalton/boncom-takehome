@@ -10,6 +10,7 @@
  */
 "use client";
 
+import { useId } from "react";
 import { formatCents } from "@/lib/money";
 import { helpText } from "@/lib/help-text";
 import type { DiscountType } from "@/lib/types";
@@ -47,6 +48,8 @@ export function AdjustmentsCard({
   onTaxChange,
   onTaxBlur,
 }: Props) {
+  const discountErrorId = useId();
+  const taxErrorId = useId();
   return (
     <section className="grid gap-5 rounded-2xl border bg-card p-5 shadow-sm sm:grid-cols-2">
       <div className="space-y-2">
@@ -71,6 +74,7 @@ export function AdjustmentsCard({
               placeholder="0"
               value={discountValue}
               error={error}
+              errorId={discountErrorId}
               onChangeNumber={(n) => onDiscountChange("percent", n)}
               onBlur={onDiscountBlur}
             />
@@ -81,13 +85,16 @@ export function AdjustmentsCard({
               className="h-10 w-full"
               valueCents={discountValue}
               error={error}
+              errorId={discountErrorId}
               onChangeCents={(cents) => onDiscountChange("fixed", cents)}
               onBlur={onDiscountBlur}
             />
           )}
         </div>
         {error ? (
-          <p className="text-xs font-medium text-destructive">{error}</p>
+          <p id={discountErrorId} className="text-xs font-medium text-destructive">
+            {error}
+          </p>
         ) : (
           discountCents > 0 && (
             <p className="text-xs tabular-nums text-muted-foreground">
@@ -107,11 +114,14 @@ export function AdjustmentsCard({
           placeholder="0"
           value={taxRatePercent}
           error={taxError}
+          errorId={taxErrorId}
           onChangeNumber={onTaxChange}
           onBlur={onTaxBlur}
         />
         {taxError ? (
-          <p className="text-xs font-medium text-destructive">{taxError}</p>
+          <p id={taxErrorId} className="text-xs font-medium text-destructive">
+            {taxError}
+          </p>
         ) : (
           <p className="text-xs tabular-nums text-muted-foreground">{formatCents(taxCents)} tax</p>
         )}
