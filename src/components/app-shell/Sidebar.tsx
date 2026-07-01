@@ -29,7 +29,10 @@ export function Sidebar({ userName }: { userName: string }) {
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r bg-sidebar">
       <div className="px-5 py-5">
-        <Link href="/" className="text-lg font-semibold text-primary">
+        <Link
+          href="/"
+          className="rounded-md text-lg font-semibold text-primary outline-none transition-all duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-[0.98]"
+        >
           kwik-quote
         </Link>
       </div>
@@ -41,8 +44,9 @@ export function Sidebar({ userName }: { userName: string }) {
             <Link
               key={href}
               href={href}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                "press flex items-center gap-3 rounded-md px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset",
                 active
                   ? "bg-accent font-medium text-accent-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -60,7 +64,7 @@ export function Sidebar({ userName }: { userName: string }) {
         <form action={signOut}>
           <button
             type="submit"
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            className="press flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
           >
             <LogOut className="size-4" />
             Log out

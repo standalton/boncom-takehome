@@ -76,7 +76,7 @@ export function ProductPicker({ products, onSelect }: Props) {
                   <Combobox.Item
                     key={item.value}
                     value={item}
-                    className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2 text-sm outline-none transition-colors select-none hover:bg-accent data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                    className="press flex cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2 text-sm outline-none select-none hover:bg-accent data-highlighted:bg-accent data-highlighted:text-accent-foreground"
                   >
                     <span className="line-clamp-1">{item.product.name}</span>
                     <span className="shrink-0 text-xs text-muted-foreground tabular-nums">

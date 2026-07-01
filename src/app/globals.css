@@ -120,6 +120,27 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Shared press feedback: the one interaction primitive for pressable nav and
+   menu items (buttons/rows own their own via shadcn). Hover styling stays with
+   each component (a color shift); this owns the click — a subtle scale-down.
+   Kept in one place per docs/STYLE_GUIDE.md so the motion language is uniform. */
+@utility press {
+  transition-property: transform, background-color, color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  &:active {
+    transform: scale(0.98);
+  }
+  /* Suppress the press scale under reduced motion. Kept inside the utility so it
+     shares the utilities layer — a guard in @layer base would lose the cascade
+     (later layer wins for normal declarations) and never take effect. */
+  @media (prefers-reduced-motion: reduce) {
+    &:active {
+      transform: none;
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

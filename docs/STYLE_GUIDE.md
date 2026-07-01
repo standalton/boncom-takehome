@@ -84,6 +84,25 @@ Fallback stack: `"Open Sans", Arial, sans-serif`.
   separation rather than heavy shadows.
 - **Imagery:** large, editorial, often dark; pair with thin white type.
 
+## Motion
+
+Interaction motion is restrained and uniform — subtle, not decorative, per the
+brand character. One shared vocabulary:
+
+- **Hover** — a quick color/background shift (nav, menu items, links) at ~150ms.
+  No lift or shadow on hover, with a single deliberate exception: the dashboard
+  Pipeline chips lift slightly (`-translate-y-0.5` + `shadow-sm`) as an accent.
+- **Press (click)** — every pressable control scales down slightly on `:active`
+  (~0.98). shadcn `Button` and table rows carry their own; nav and menu items
+  share the `.press` utility (defined once in `globals.css`). Large elements
+  (table rows) use `0.99` so the *perceived* travel matches smaller controls.
+- **Focus** — keyboard focus shows a cyan ring (`--ring`) via `focus-visible`.
+- **Reduced motion** — `prefers-reduced-motion` disables transitions and the
+  press scale globally (see `globals.css`).
+
+Keep motion in this register: quiet, consistent, and quick. Reach for the shared
+`.press` utility rather than re-deriving per-component press styles.
+
 ## Implementation note
 
 When the stack is chosen, encode these as CSS custom properties (or a Tailwind

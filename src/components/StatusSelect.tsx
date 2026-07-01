@@ -68,7 +68,7 @@ export function StatusSelect({ value, onSelect, disabled }: Props) {
                   setOpen(false);
                   onSelect(s);
                 }}
-                className="press flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm outline-none hover:bg-accent"
+                className="press flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
               >
                 <span
                   className="size-2 rounded-full"

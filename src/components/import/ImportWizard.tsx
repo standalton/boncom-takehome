@@ -41,7 +41,7 @@ export function ImportWizard({ initialTarget }: { initialTarget: ImportTarget })
   }
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <Stepper step={step} />
       {step === "upload" && <UploadStep target={target} onParsed={onParsed} />}
       {step === "map" && table && (
