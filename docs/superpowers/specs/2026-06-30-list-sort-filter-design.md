@@ -47,7 +47,7 @@ Rejected alternatives:
 | Table    | Sortable columns (base-table)                 | Default sort        | Filter  |
 | -------- | --------------------------------------------- | ------------------- | ------- |
 | Quotes   | Number, Status, Total, Updated                | `updated_at` desc   | Status  |
-| Products | Name, Unit, Default rate                      | `created_at` desc   | Unit    |
+| Products | Name, Unit, Default rate                      | `name` asc          | Unit    |
 | Clients  | Company, Contact, Email                       | `company` asc       | none    |
 
 ## URL parameters
