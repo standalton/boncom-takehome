@@ -6,6 +6,25 @@ specifically about *the decisions behind the build*; this is where they live.
 
 Format: newest first.
 
+## 2026-07-01 — Harden the import_commit RPC (advisor lint 0011 + least-privilege)
+
+- **Decision:** Migration `0009_harden_import_commit.sql` pins the function's
+  `search_path` to empty (schema-qualifying every relation as `public.<table>`)
+  and revokes `EXECUTE` from `public`/`anon`, keeping it only for
+  `authenticated`. The function stays `SECURITY INVOKER`.
+- **Why:** Clears the `function_search_path_mutable` security advisory and
+  removes dead call surface. Both are defense-in-depth, not fixes for an
+  exploitable hole — because the function runs `SECURITY INVOKER` under the
+  caller's RLS, `anon`/`public` could never call it usefully (their writes are
+  denied by the per-command policies) and a mutable `search_path` only affected
+  the caller's own session. Verified against the Supabase docs, which require a
+  set `search_path` for functions and full schema-qualification when it is empty.
+- **Note:** `authenticated` must retain `EXECUTE` — `commitImport`
+  (`src/actions/import.ts`) calls the RPC through the SSR client (anon key +
+  session cookies), i.e. as `authenticated`. The one remaining security advisor,
+  leaked-password protection, is a dashboard Auth toggle (no code) left for the
+  project owner to enable.
+
 ## 2026-06-30 — Tighten RLS policies (resolve advisor lint 0024)
 
 - **Decision:** Replaced the blanket `for all … using (true) with check (true)`
