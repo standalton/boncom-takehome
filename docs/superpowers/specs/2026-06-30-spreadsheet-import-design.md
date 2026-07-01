@@ -36,8 +36,9 @@ standalone presets are the clean cut line — the hero flow still ships complete
   auto-merge corrupts data across every quote for both records; a duplicate is a
   10-second manual fix. We optimize against the expensive failure. See "Key
   decision: entity resolution" below.
-- **No new client fields** (phone, separate contact name) added to support
-  matching heuristics. Matching uses the existing `name` / `company` / `email`.
+- **No new schema fields added to support matching heuristics.** The `clients`
+  table already has `company` / `contact_name` / `email` / `phone`; matching uses
+  only the identifying field (`company`), not a multi-field score.
 - **No editing of tax/discount during import.** Imported quotes land as `draft`
   with tax and discount at 0, to be finished in the existing editor.
 - **No background/async job queue.** Import is synchronous within request limits
@@ -108,8 +109,9 @@ A flat line-item sheet needs a grouping key:
 
 Rejected alternative — multi-field confidence scoring (company + contact + email
 + phone -> threshold): thresholds are indefensible without labeled duplicate
-data on a brand-new app, the schema lacks the fields, and a bad auto-merge is a
-silent data-integrity bug far more expensive than the duplicate it prevents.
+data on a brand-new app, and a bad auto-merge is a silent data-integrity bug far
+more expensive than the duplicate it prevents. Human-confirmed resolution is
+correct by construction.
 
 ## File format: CSV + XLSX
 
