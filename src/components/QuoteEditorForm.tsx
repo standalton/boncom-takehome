@@ -19,6 +19,7 @@ import { LineItemRow, type LineItemPatch } from "@/components/LineItemRow";
 import { AdjustmentsCard } from "@/components/AdjustmentsCard";
 import { ClientPicker } from "@/components/ClientPicker";
 import type { ClientOption } from "@/lib/client-option";
+import type { ProductOption } from "@/lib/product-option";
 
 const eyebrow =
   "flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
@@ -30,6 +31,7 @@ export type EditorLine = {
   rateCents: number;
   discountType: DiscountType;
   discountValue: number;
+  productId: string | null;
 };
 
 type Props = {
@@ -37,6 +39,7 @@ type Props = {
   clientId: string;
   onClientChange: (id: string) => void;
   onClientAdded: (client: Client) => void;
+  products: ProductOption[];
   lines: EditorLine[];
   lineNets: number[];
   onUpdateLine: (key: string, patch: LineItemPatch) => void;
@@ -58,6 +61,7 @@ export function QuoteEditorForm({
   clientId,
   onClientChange,
   onClientAdded,
+  products,
   lines,
   lineNets,
   onUpdateLine,
@@ -107,6 +111,7 @@ export function QuoteEditorForm({
               discountType={l.discountType}
               discountValue={l.discountValue}
               lineNetCents={lineNets[i] ?? 0}
+              products={products}
               onChange={(patch) => onUpdateLine(l.key, patch)}
               onRemove={() => onRemoveLine(l.key)}
             />

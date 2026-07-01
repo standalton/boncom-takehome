@@ -24,6 +24,8 @@ export const lineItemSchema = z
     rateCents: z.number().int().min(0, "Rate cannot be negative"),
     discountType,
     discountValue: z.number().min(0, "Discount cannot be negative"),
+    // Optional link to the catalog product a line was filled from (audit only).
+    productId: z.string().nullable().optional(),
   })
   .refine(percentNotOver100, {
     message: "Percentage discount cannot exceed 100%",

@@ -6,7 +6,7 @@
  */
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { listQuotes } from "@/actions/quotes";
+import { listQuotes } from "@/actions/quote-queries";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { QuoteList, type QuoteListRow } from "@/components/QuoteList";

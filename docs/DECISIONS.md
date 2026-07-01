@@ -6,6 +6,51 @@ specifically about *the decisions behind the build*; this is where they live.
 
 Format: newest first.
 
+## 2026-06-30 — Enforce the quote lifecycle server-side
+
+- **Decision:** The quote lock is enforced in the server actions, not just the
+  UI. `saveQuote` writes only while a quote is a `draft`, and `setStatus` only
+  performs transitions the `lib/quote-status` state machine permits. Both use
+  conditional UPDATEs (`.eq("status","draft")` / `.in("status", …)`) so the
+  check and the write are a single, race-free statement.
+- **Why:** Server actions are real endpoints an authenticated user can call
+  directly, bypassing the disabled/read-only UI. The OWASP item "authorize
+  protected actions server-side" (see `CLAUDE.md`) requires the trust boundary
+  to be the server, not the browser.
+- **Tradeoff:** `deleteQuote` is intentionally left unrestricted by status —
+  deletion is a legitimate action at any stage, already scoped by RLS to the
+  workspace and confirmed in the UI. Restricting it would need matching UI
+  changes for no real safety gain in an internal tool.
+
+## 2026-06-30 — Show quote history from the existing activity log
+
+- **Decision:** Surface the append-only `activity_log` as a read-only timeline
+  (`QuoteActivity`) at the bottom of the quote document, fetched server-side via
+  `listActivity`.
+- **Why:** The audit data was already being written on create/save/status
+  changes but never shown; a lightweight timeline makes a quote's history
+  visible with no schema or write-path changes.
+- **Note:** Timestamps render in UTC on the server/first paint and upgrade to
+  the viewer's local time after mount, avoiding a hydration mismatch.
+
+## 2026-06-30 — Record what each save changed, not just "saved"
+
+- **Decision:** `saveQuote` snapshots the quote's prior state, diffs it against
+  the incoming edit (`lib/quote-changes.summarizeChanges`), and stores concrete
+  change strings ("Set tax rate to 8%", "Added 1 line item") in the activity
+  log. A no-op save records nothing.
+- **Why:** The history previously showed a wall of identical "Edits saved" rows
+  — useless for understanding what happened. Field-level changes are exact;
+  line-item edits collapse to "Edited line items" because items are replaced as
+  an ordered list with no stable identity across saves (per-line matching would
+  be a fragile guess).
+- **Note:** History moved into the header actions menu ("View history") rather
+  than sitting below the quote body.
+- **Follow-up:** Line items now persist their originating catalog `product_id`
+  (earlier deferred as YAGNI). It earns its keep: the change log can report
+  "Applied catalog item 'X'" instead of a bare "rate changed" when a line is
+  filled from the catalog, which is what actually happened.
+
 ---
 
 ## 2026-06-30 — Sending a quote is a confirmed action

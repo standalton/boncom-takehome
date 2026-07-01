@@ -68,13 +68,18 @@ codebase grows. Format:_
 | If you need... | Look in... |
 | -------------- | ---------- |
 | Estimate math (totals, tax, discounts) | `src/lib/pricing.ts` |
+| Quote lifecycle (editable? valid transitions?) | `src/lib/quote-status.ts` |
 | Currency formatting / parsing | `src/lib/money.ts` |
+| Product billing units (dropdown options + labels) | `src/lib/product-units.ts` |
 | Input validation rules (Zod) | `src/lib/validation.ts` |
 | shadcn/ui components | `src/components/ui/` |
 | App-specific components | `src/components/` |
-| Server actions (mutations) | `src/actions/` (auth, clients, quotes) |
+| Quote mutations (save, status, duplicate, delete) | `src/actions/quotes.ts` |
+| Quote reads (list, get, activity) | `src/actions/quote-queries.ts` |
+| Activity-log write helpers (record + diff) | `src/lib/quote-audit.ts` |
+| Server actions (mutations) | `src/actions/` (auth, clients, quotes, products) |
 | Supabase clients + middleware | `src/lib/supabase/` |
-| Routes / pages | `src/app/(app)/` (dashboard, clients, quotes), `src/app/login/` |
+| Routes / pages | `src/app/(app)/` (dashboard, clients, quotes, products), `src/app/login/` |
 | Database schema + seed | `supabase/migrations/`, `supabase/seed.sql` |
 | Unit tests | colocated `src/**/*.test.ts` |
 | E2E tests | `e2e/` |
@@ -89,15 +94,26 @@ building something new, to avoid duplicating what already exists. Format:_
 | Name | Location | Purpose |
 | ---- | -------- | ------- |
 | `computeTotals` | `src/lib/pricing.ts` | Pure estimate math; used by editor (live) and server (save). |
+| `isEditableStatus` / `canTransition` / `statusesThatCanBecome` | `src/lib/quote-status.ts` | Quote lifecycle state machine; enforced server-side in `actions/quotes.ts`. |
+| `summarizeChanges` | `src/lib/quote-changes.ts` | Diffs a quote save into human-readable change strings for the activity log. |
+| `toActivityEntries` / `ActivityEntry` | `src/lib/activity.ts` | Activity-log row → UI entry shape; used by `listActivity` and the history dialog. |
 | `formatCents` / `dollarsToCents` | `src/lib/money.ts` | Cents <-> display dollar strings. |
+| `PRODUCT_UNITS` / `isProductUnit` / `formatUnit` | `src/lib/product-units.ts` | Closed set of billing units; drives the unit dropdown and server-side validation. |
 | `lineItemSchema` / `quoteSchema` | `src/lib/validation.ts` | Shared Zod validation (UI + server). |
 | `HelpHint` + `helpText` | `src/components/HelpHint.tsx`, `src/lib/help-text.ts` | The one tooltip pattern + central copy. |
 | `MoneyInput` | `src/components/MoneyInput.tsx` | Currency input bound to integer cents. |
 | `NumberInput` | `src/components/NumberInput.tsx` | Numeric input (local text state) reporting a parsed number. |
 | `selectAllOnFocus` | `src/lib/field-helpers.ts` | Select an input's contents on focus (with mouseup guard). |
 | `ClientPicker` | `src/components/ClientPicker.tsx` | Searchable customer combobox with inline "add new". |
-| `NewClientDialog` | `src/components/NewClientDialog.tsx` | Modal to create a client without leaving the screen. |
+| `ClientList` | `src/components/ClientList.tsx` | Clients table; rows expand inline to show that client's quote history (lazy-loaded via listQuotesByClient). |
+| `ProductPicker` + `toProductOption` | `src/components/ProductPicker.tsx`, `src/lib/product-option.ts` | Per-line catalog picker; fills a line's description + rate from a product. |
+| `NewClientDialog` | `src/components/NewClientDialog.tsx` | Modal to create or edit a client (shared form) without leaving the screen. |
+| `ClientActionsMenu` | `src/components/ClientActionsMenu.tsx` | Per-row edit + delete menu for a client (delete refused if quotes exist). |
+| `ProductDialog` | `src/components/ProductDialog.tsx` | Create/edit a catalog product (shared form; used by add + edit). |
+| `AddProductDialog` | `src/components/AddProductDialog.tsx` | Products-page "Add product" button + create dialog. |
+| `ProductActionsMenu` | `src/components/ProductActionsMenu.tsx` | Per-row edit + (soft) delete menu for a catalog product. |
 | `SendQuoteDialog` | `src/components/SendQuoteDialog.tsx` | Confirm-send modal shown when a quote moves to "Sent". |
 | `QuoteEditor` | `src/components/QuoteEditor.tsx` | The core quote editor (editable number, live totals). |
+| `QuoteActivity` | `src/components/QuoteActivity.tsx` | Read-only history timeline of a quote's activity_log (shown in the actions-menu "View history" dialog). |
 | `Sidebar` / app shell | `src/components/app-shell/` | Authenticated nav shell. |
 | quote/client/auth actions | `src/actions/` | Server-side mutations with validation + audit. |

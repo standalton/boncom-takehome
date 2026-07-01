@@ -29,6 +29,18 @@ type Props = {
   onSend: () => void;
 };
 
+// One label-over-value column in the breakdown group.
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <dt className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+        {label}
+      </dt>
+      <dd className="text-sm font-medium tabular-nums">{value}</dd>
+    </div>
+  );
+}
+
 export function QuoteTotalsBar({
   status,
   subtotalCents,
@@ -42,41 +54,28 @@ export function QuoteTotalsBar({
   onSend,
 }: Props) {
   return (
-    <div className="fixed right-0 bottom-0 left-60 z-20 border-t bg-card/85 backdrop-blur-md">
-      <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-8 py-3">
-        <div className="hidden items-center gap-5 text-sm text-muted-foreground sm:flex">
-          <span>
-            Subtotal{" "}
-            <span className="font-medium text-foreground tabular-nums">
-              {formatCents(subtotalCents)}
-            </span>
-          </span>
-          {discountCents > 0 && (
-            <span>
-              Disc{" "}
-              <span className="font-medium text-foreground tabular-nums">
-                −{formatCents(discountCents)}
+    <div className="fixed right-0 bottom-0 left-60 z-20">
+      <div className="border-t bg-card shadow-[0_-10px_30px_-16px_rgba(0,32,66,0.28)]">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-6 px-8 pt-3.5 pb-5">
+          <dl className="hidden items-center gap-7 sm:flex">
+            <Stat label="Subtotal" value={formatCents(subtotalCents)} />
+            {discountCents > 0 && <Stat label="Discount" value={`−${formatCents(discountCents)}`} />}
+            <Stat label="Tax" value={formatCents(taxCents)} />
+          </dl>
+
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col items-end gap-0.5 sm:border-l sm:border-border sm:pl-6">
+              <span className="text-[10px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+                Total
               </span>
-            </span>
-          )}
-          <span>
-            Tax{" "}
-            <span className="font-medium text-foreground tabular-nums">{formatCents(taxCents)}</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-5">
-          <div className="text-right leading-none">
-            <div className="text-[10px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
-              Total
+              <span
+                data-testid="grand-total"
+                className="text-[28px] leading-none font-semibold text-primary tabular-nums"
+              >
+                {formatCents(totalCents)}
+              </span>
             </div>
-            <div
-              data-testid="grand-total"
-              className="mt-1 text-2xl font-light text-primary tabular-nums transition-all"
-            >
-              {formatCents(totalCents)}
-            </div>
-          </div>
-          {status === "draft" && (
+            {status === "draft" && (
             <Tooltip>
               <TooltipTrigger
                 render={<Button size="lg" disabled={saving || statusPending} onClick={onFinalize} />}
@@ -105,6 +104,7 @@ export function QuoteTotalsBar({
               Export
             </Button>
           )}
+          </div>
         </div>
       </div>
     </div>

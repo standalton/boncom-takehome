@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MoneyInput } from "@/components/MoneyInput";
 import { NumberInput } from "@/components/NumberInput";
+import { ProductPicker } from "@/components/ProductPicker";
+import type { ProductOption } from "@/lib/product-option";
 
 export type LineItemPatch = Partial<{
   description: string;
@@ -24,6 +26,7 @@ export type LineItemPatch = Partial<{
   rateCents: number;
   discountType: DiscountType;
   discountValue: number;
+  productId: string | null;
 }>;
 
 type Props = {
@@ -33,6 +36,7 @@ type Props = {
   discountType: DiscountType;
   discountValue: number;
   lineNetCents: number;
+  products: ProductOption[];
   onChange: (patch: LineItemPatch) => void;
   onRemove: () => void;
 };
@@ -44,6 +48,7 @@ export function LineItemRow({
   discountType,
   discountValue,
   lineNetCents,
+  products,
   onChange,
   onRemove,
 }: Props) {
@@ -52,6 +57,21 @@ export function LineItemRow({
   return (
     <div className="group/row border-b px-4 py-3 transition-colors last:border-b-0 hover:bg-muted/20">
       <div className="flex items-center gap-2">
+        {products.length > 0 && (
+          <ProductPicker
+            products={products}
+            // Picking a product fills the line; a blank description takes the
+            // product name, but a description you've already typed is kept.
+            // productId records that this came from the catalog (for history).
+            onSelect={(p) =>
+              onChange({
+                description: description.trim() ? description : p.name,
+                rateCents: p.rateCents,
+                productId: p.id,
+              })
+            }
+          />
+        )}
         <Input
           placeholder="Add a description…"
           className="h-9 flex-1 text-[15px] font-medium placeholder:font-normal placeholder:text-muted-foreground/60"

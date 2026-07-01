@@ -17,6 +17,7 @@ import { computeTotals } from "@/lib/pricing";
 import { saveQuote, setStatus } from "@/actions/quotes";
 import type { Client, DiscountType, QuoteStatus } from "@/lib/types";
 import { toClientOption, type ClientOption } from "@/lib/client-option";
+import type { ProductOption } from "@/lib/product-option";
 import { exportQuoteFromEditor } from "@/lib/export-quote";
 import type { LineItemPatch } from "@/components/LineItemRow";
 import type { EditorLine } from "@/components/QuoteEditorForm";
@@ -28,6 +29,7 @@ export type QuoteEditorInit = {
   updatedAt: string;
   clientId: string;
   clients: ClientOption[];
+  products: ProductOption[];
   taxRatePercent: number;
   orderDiscountType: DiscountType;
   orderDiscountValue: number;
@@ -84,7 +86,15 @@ export function useQuoteEditor(init: QuoteEditorInit) {
   const addLine = () => {
     setLines((prev) => [
       ...prev,
-      { key: newKey(), description: "", quantity: 1, rateCents: 0, discountType: "none", discountValue: 0 },
+      {
+        key: newKey(),
+        description: "",
+        quantity: 1,
+        rateCents: 0,
+        discountType: "none",
+        discountValue: 0,
+        productId: null,
+      },
     ]);
     setDirty(true);
   };
@@ -132,6 +142,7 @@ export function useQuoteEditor(init: QuoteEditorInit) {
         rateCents: l.rateCents,
         discountType: l.discountType,
         discountValue: l.discountValue,
+        productId: l.productId,
       })),
     };
   }
@@ -212,7 +223,7 @@ export function useQuoteEditor(init: QuoteEditorInit) {
   }
 
   return {
-    clients, clientId, status, validUntil, taxRatePercent,
+    clients, products: init.products, clientId, status, validUntil, taxRatePercent,
     orderDiscountType, orderDiscountValue, notes, lines,
     dirty, lastSavedAt, mounted, saving, statusPending,
     sendOpen, setSendOpen, selectedClient, locked, totals,

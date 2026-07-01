@@ -16,6 +16,7 @@ import { HelpHint } from "@/components/HelpHint";
 import { DateField } from "@/components/DateField";
 import { StatusSelect, StatusBadge } from "@/components/StatusSelect";
 import { QuoteActionsMenu } from "@/components/QuoteActionsMenu";
+import type { ActivityEntry } from "@/components/QuoteActivity";
 
 const eyebrow =
   "flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
@@ -23,6 +24,7 @@ const eyebrow =
 type Props = {
   id: string;
   number: string;
+  activity: ActivityEntry[];
   status: QuoteStatus;
   locked: boolean;
   dirty: boolean;
@@ -40,6 +42,7 @@ type Props = {
 export function QuoteEditorHeader({
   id,
   number,
+  activity,
   status,
   locked,
   dirty,
@@ -109,7 +112,7 @@ export function QuoteEditorHeader({
               {saving ? "Saving…" : "Save"}
             </Button>
           )}
-          <QuoteActionsMenu id={id} number={number} />
+          <QuoteActionsMenu id={id} number={number} activity={activity} />
         </div>
       </div>
     </div>

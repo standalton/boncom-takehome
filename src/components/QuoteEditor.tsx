@@ -14,10 +14,11 @@ import { QuoteEditorHeader } from "@/components/QuoteEditorHeader";
 import { QuoteEditorForm } from "@/components/QuoteEditorForm";
 import { QuoteInvoiceView } from "@/components/QuoteInvoiceView";
 import { QuoteTotalsBar } from "@/components/QuoteTotalsBar";
+import type { ActivityEntry } from "@/components/QuoteActivity";
 
-export type QuoteEditorProps = QuoteEditorInit;
+export type QuoteEditorProps = QuoteEditorInit & { activity: ActivityEntry[] };
 
-export function QuoteEditor(props: QuoteEditorProps) {
+export function QuoteEditor({ activity, ...props }: QuoteEditorProps) {
   const q = useQuoteEditor(props);
   const { totals } = q;
 
@@ -27,6 +28,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
         <QuoteEditorHeader
           id={props.id}
           number={props.number}
+          activity={activity}
           status={q.status}
           locked={q.locked}
           dirty={q.dirty}
@@ -63,6 +65,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
             clientId={q.clientId}
             onClientChange={q.changeClient}
             onClientAdded={q.addClient}
+            products={q.products}
             lines={q.lines}
             lineNets={totals.lineNetsCents}
             onUpdateLine={q.updateLine}

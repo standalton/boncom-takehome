@@ -7,7 +7,7 @@
  */
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { listQuotes } from "@/actions/quotes";
+import { listQuotes } from "@/actions/quote-queries";
 import { formatCents } from "@/lib/money";
 import type { QuoteStatus } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
