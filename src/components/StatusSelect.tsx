@@ -7,8 +7,9 @@
  *              (Sent / Accepted / Paid / Declined). Draft → Sent is a separate
  *              "Send" action, so it is intentionally not in this menu.
  * Where used:  The quote editor header.
- * Notes:       Colour metadata lives here so the badge, trigger, and menu stay
- *              in sync.
+ * Notes:       Colour metadata lives in lib/status-meta (plain data, so server
+ *              components can use it too) and is re-exported here for callers that
+ *              already import it from this module.
  */
 "use client";
 
@@ -16,15 +17,9 @@ import { useState } from "react";
 import { Popover } from "@base-ui/react/popover";
 import { Check, ChevronDown } from "lucide-react";
 import type { QuoteStatus } from "@/lib/types";
+import { statusMeta } from "@/lib/status-meta";
 
-export const statusMeta: Record<QuoteStatus, { dot: string; pill: string; label: string }> = {
-  draft: { dot: "#9ca3af", pill: "bg-muted text-muted-foreground border-border", label: "Draft" },
-  finalized: { dot: "#f59e0b", pill: "bg-amber-50 text-amber-800 border-amber-200", label: "Finalized" },
-  sent: { dot: "#3b82f6", pill: "bg-blue-50 text-blue-800 border-blue-200", label: "Sent" },
-  accepted: { dot: "#22c55e", pill: "bg-green-50 text-green-800 border-green-200", label: "Accepted" },
-  paid: { dot: "#10b981", pill: "bg-emerald-50 text-emerald-800 border-emerald-200", label: "Paid" },
-  declined: { dot: "#ef4444", pill: "bg-red-50 text-red-800 border-red-200", label: "Declined" },
-};
+export { statusMeta } from "@/lib/status-meta";
 
 // Statuses reachable once a quote has been sent. (Draft and Sent are reached via
 // the dedicated Send action, not this menu.)
@@ -73,7 +68,7 @@ export function StatusSelect({ value, onSelect, disabled }: Props) {
                   setOpen(false);
                   onSelect(s);
                 }}
-                className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors outline-none hover:bg-accent"
+                className="press flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm outline-none hover:bg-accent"
               >
                 <span
                   className="size-2 rounded-full"

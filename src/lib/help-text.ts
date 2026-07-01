@@ -18,6 +18,15 @@ export const helpText = {
   taxRate: "The tax percentage, applied to the subtotal after discounts.",
   validUntil: "The date this quote expires.",
   notes: "Internal notes about this quote. Not shown to the client.",
+
+  // Dashboard sections
+  dashOpenPipeline:
+    "Total value of quotes that are finalized or sent — deals still in play, awaiting a decision.",
+  dashWon: "Total value of accepted or paid quotes, with your win rate (won ÷ decided).",
+  dashAwaiting: "How many quotes you've sent that are still awaiting a client response.",
+  dashDrafts: "Quotes still being worked on and not yet finalized.",
+  dashPipeline: "A count of quotes at each stage of the lifecycle.",
+  dashRecentQuotes: "Your ten most recently updated quotes.",
 } as const;
 
 export type HelpKey = keyof typeof helpText;

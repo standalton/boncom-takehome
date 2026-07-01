@@ -27,10 +27,12 @@ export default async function AppLayout({
     .eq("id", user.id)
     .single();
 
+  // Fixed-height shell: the sidebar stays put (its footer pinned to the viewport)
+  // and only the main column scrolls.
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar userName={profile?.full_name ?? user.email ?? "User"} />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 }
