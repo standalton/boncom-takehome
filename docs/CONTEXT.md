@@ -86,7 +86,8 @@ codebase grows. Format:_
 | RLS policies (per-command, shared workspace) | `supabase/migrations/0001_init.sql`, `0007_tighten_rls_policies.sql` |
 | Activity-log write helpers (record + diff) | `src/lib/quote-audit.ts` |
 | Server actions (mutations) | `src/actions/` (auth, clients, quotes, products) |
-| Supabase clients + middleware | `src/lib/supabase/` |
+| Supabase clients + middleware | `src/lib/supabase/` (middleware uses `getClaims()` for local JWT verification — no auth round-trip on the happy path) |
+| Route loading skeletons (instant nav feedback) | `src/app/(app)/**/loading.tsx`, `src/components/skeletons/` |
 | Routes / pages | `src/app/(app)/` (dashboard, clients, quotes, products), `src/app/login/` |
 | Database schema + seed | `supabase/migrations/`, `supabase/seed.sql` (named-UUID base rows + a deterministic bulk block that generates ~60 clients / ~75 quotes for a multi-page demo) |
 | Unit tests | colocated `src/**/*.test.ts` |
@@ -142,3 +143,4 @@ building something new, to avoid duplicating what already exists. Format:_
 | `ImportWizard` | `src/components/import/ImportWizard.tsx` | 3-step import flow (upload → map columns → preview & commit) with a numbered stepper; content-card styling like the editor. Lives at `/import` but is **intentionally not linked in the nav** (kept out of the live demo path); reach it by direct URL. Fully built + tested; see the spec/plan under `docs/superpowers`. |
 | `templateCsv` / `DownloadTemplate` | `src/lib/import/template.ts`, `src/components/import/DownloadTemplate.tsx` | Ready-to-fill CSV template per target (headers auto-map to the target's fields); the upload step's "Download template" link downloads it in-browser. |
 | `ImportSoonButton` | `src/components/import/ImportSoonButton.tsx` | Disabled "Import (Soon)" teaser on the list-page headers — signals the roadmap while the built feature stays off the demo path. Swap for a `/import` link to ship it. |
+| `ListPageSkeleton` / `EditorSkeleton` | `src/components/skeletons/` | Layout-stable shimmer placeholders rendered by the route `loading.tsx` files so navigation shows instant feedback while server data loads. |

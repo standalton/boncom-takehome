@@ -43,3 +43,4 @@ supabase/.temp/
 # Next.js TypeScript
 next-env.d.ts
 *.tsbuildinfo
+.vercel

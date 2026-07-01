@@ -5,8 +5,13 @@
  *              the auth cookies current.
  * Where used:  Called by the root middleware.ts.
  * Notes:       Must run on every request so server-rendered pages see a valid
- *              session. Do not add logic between createServerClient and
- *              getUser().
+ *              session. Uses getClaims() rather than getUser(): with asymmetric
+ *              JWT signing keys it verifies the token locally (WebCrypto +
+ *              cached JWKS) instead of a network round-trip to the auth server,
+ *              only hitting the network to refresh an expired token. This runs
+ *              on every navigation and server action, so the saved round-trip is
+ *              what keeps clicks feeling instant. Do not add logic between
+ *              createServerClient and getClaims().
  */
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
@@ -27,6 +32,6 @@ export async function updateSession(request: NextRequest) {
       },
     },
   );
-  await supabase.auth.getUser();
+  await supabase.auth.getClaims();
   return response;
 }
