@@ -89,7 +89,7 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
                     <Combobox.Item
                       key={item.value}
                       value={item}
-                      className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm outline-none transition-colors select-none hover:bg-accent data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                      className="press flex cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm outline-none select-none hover:bg-accent data-highlighted:bg-accent data-highlighted:text-accent-foreground"
                     >
                       <span className="line-clamp-1">{item.company}</span>
                       <Combobox.ItemIndicator>
@@ -104,7 +104,7 @@ export function ClientPicker({ clients, value, onChange, onClientAdded }: Props)
                 <button
                   type="button"
                   onClick={() => setAddOpen(true)}
-                  className="flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-primary outline-none transition-colors hover:bg-accent"
+                  className="press flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-primary outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
                 >
                   <UserPlus className="size-4" />
                   {query.trim() ? `Add “${query.trim()}” as a customer` : "Add new customer"}
