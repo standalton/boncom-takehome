@@ -6,6 +6,18 @@ specifically about *the decisions behind the build*; this is where they live.
 
 Format: newest first.
 
+## 2026-06-30 — Spreadsheet import parsers
+
+- **Decision:** Import accepts CSV and XLSX, parsed with `papaparse` (CSV) and
+  `read-excel-file` (XLSX).
+- **Why:** Both are installable and patchable through npm, so `npm audit` and
+  Dependabot cover them. Rejected SheetJS (`xlsx`): its security fixes ship via
+  the vendor CDN, not npm, so our dependency scanning can't see them —
+  incompatible with the "no known-vulnerable packages" rule. `read-excel-file`
+  is read-only, which keeps the attack surface of the untrusted-file path small.
+- **Note:** `npm audit` after install shows only a pre-existing `postcss`-via-
+  `next` advisory; neither parser introduced a vulnerability.
+
 ## 2026-06-30 — Discount validation + already-sent handling
 
 - **Decision:** A fixed order discount larger than the subtotal is now rejected
