@@ -24,17 +24,34 @@ Prefer to type credentials? Use `sarah@kwikquote.app` (or `mike@kwikquote.app` /
 
 ## What's built
 
-- **Auth** — Supabase email/password with one-tap demo login for three seeded users.
-- **Estimates dashboard** — list with status, totals, search; create new estimates.
-- **Quote editor** — pick a client, add line items, set an order discount (% or $)
-  and tax; the **grand total updates live as you type**. Explicit save.
-- **Clients** — reusable client records (shared team workspace).
+- **Auth** — Supabase email/password with one-tap demo login for three seeded
+  users; a show/hide toggle on the password field.
+- **Dashboard** — lifecycle-aware metrics (open pipeline, won + win rate,
+  awaiting reply, drafts), a pipeline breakdown, and the most recent quotes.
+- **Quote editor** — pick a client (or add one inline), add line items from the
+  product catalog or free-hand, apply **per-line discounts** *and* an order-level
+  discount (% or $) plus tax; the **grand total updates live as you type**.
+  Explicit save.
+- **Status pipeline** — an enforced state machine (draft → finalized → sent →
+  accepted → paid / declined) with a status control in the editor, a send
+  confirmation, and reopen-to-draft. Transitions are validated server-side.
+- **Per-quote history** — the who-changed-what audit trail is surfaced in the UI
+  as a "View history" timeline; every create / save / status change is recorded.
+- **PDF export** — a real vector PDF of the quote, downloadable from the send
+  dialog (`@react-pdf/renderer`).
+- **Duplicate & delete** — clone a quote as a new draft, or delete it.
+- **Clients & Products** — reusable client records (with inline quote history) and
+  a full product catalog (create / edit / soft-delete); shared team workspace.
+- **Lists** — search, column sort, status/unit filters, and pagination across
+  quotes, clients, and products.
+- **Spreadsheet import** — a 3-step import wizard (upload → map columns → preview
+  & commit, transactional) is fully built and tested, but **intentionally kept
+  off the nav** to keep the demo path focused; reach it at `/import`.
 - **Correct-by-construction math** — all pricing lives in one pure, unit-tested
   module (`src/lib/pricing.ts`) used by both the live UI and the server on save,
   so the displayed total and the stored total can never diverge.
 - **Three-layer validation** — the same Zod rules enforced in the UI, in server
   actions, and by database CHECK constraints (e.g. no >100% discount).
-- **Audit trail** — every create/save/status-change is recorded per quote.
 
 ## Getting started
 
@@ -50,7 +67,7 @@ Database schema and seed data live in `supabase/` (`migrations/0001_init.sql`,
 ### Scripts
 
 ```bash
-npm test            # unit tests (pricing, money, validation)
+npm test            # unit + component tests (pricing, money, validation, PDF, inputs, …)
 npm run test:e2e    # Playwright end-to-end (core create -> save -> persist flow)
 npm run typecheck   # tsc --noEmit
 npm run build       # production build
@@ -61,13 +78,17 @@ npm run build       # production build
 Next.js (App Router) + TypeScript · Supabase (Postgres, Auth, RLS) · Tailwind +
 shadcn/ui (Lucide icons) · Zod · Vitest + Playwright · deployed on Vercel.
 
-## What I'd do next (Phase 2/3)
+## What I'd do next
 
-Per-line discount UI, a product catalog picker, duplicate-quote, the full
-status pipeline with a visual stepper, the audit timeline surfaced in the UI,
-PDF export, realtime "newer version" notifications (Supabase Realtime), and an
-AI "draft my line items from a project description" assist. These are designed
-for in the spec and intentionally deferred to keep the core airtight.
+A few things are designed for in the spec but intentionally deferred:
+
+- **Realtime collaboration** — live "a newer version was sent" notifications via
+  Supabase Realtime. Today the editor computes and warns about sent siblings on
+  load, but there's no live subscription pushing changes between open sessions.
+- **AI assist** — "draft my line items from a project description" to jump-start
+  a quote from plain text.
+- **Polish** — surface the import wizard in the nav once it's part of the demo
+  path, and a visual stepper for the status pipeline.
 
 ## Project docs
 
