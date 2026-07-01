@@ -70,7 +70,8 @@ codebase grows. Format:_
 | Estimate math (totals, tax, discounts) | `src/lib/pricing.ts` |
 | Quote lifecycle (editable? valid transitions?) | `src/lib/quote-status.ts` |
 | List sort parsing/validation (?sort, ?dir) | `src/lib/list-params.ts` |
-| Dashboard metrics + needs-attention (pure) | `src/lib/dashboard.ts` |
+| Dashboard metrics (pure) | `src/lib/dashboard.ts` |
+| Status display colours/labels | `src/lib/status-meta.ts` |
 | Currency formatting / parsing | `src/lib/money.ts` |
 | Product billing units (dropdown options + labels) | `src/lib/product-units.ts` |
 | Input validation rules (Zod) | `src/lib/validation.ts` |
@@ -78,6 +79,10 @@ codebase grows. Format:_
 | App-specific components | `src/components/` |
 | Quote mutations (save, status, duplicate, delete) | `src/actions/quotes.ts` |
 | Quote reads (list, get, activity) | `src/actions/quote-queries.ts` |
+| Spreadsheet import (parse, resolve, preview logic) | `src/lib/import/` |
+| Import server actions (parse/preview/commit) | `src/actions/import.ts` |
+| Import wizard UI + route | `src/components/import/`, `src/app/(app)/import/` |
+| Transactional import commit (SQL) | `supabase/migrations/0006_import_commit_rpc.sql` |
 | Activity-log write helpers (record + diff) | `src/lib/quote-audit.ts` |
 | Server actions (mutations) | `src/actions/` (auth, clients, quotes, products) |
 | Supabase clients + middleware | `src/lib/supabase/` |
@@ -121,6 +126,12 @@ building something new, to avoid duplicating what already exists. Format:_
 | `SendQuoteDialog` | `src/components/SendQuoteDialog.tsx` | Confirm-send modal shown when a quote moves to "Sent". |
 | `QuoteEditor` | `src/components/QuoteEditor.tsx` | The core quote editor (editable number, live totals). |
 | `QuoteActivity` | `src/components/QuoteActivity.tsx` | Read-only history timeline of a quote's activity_log (shown in the actions-menu "View history" dialog). |
-| `NeedsAttention` / `DashboardActivityFeed` | `src/components/NeedsAttention.tsx`, `src/components/DashboardActivityFeed.tsx` | Dashboard panels: expiring/expired outstanding quotes, and the global recent-activity feed. |
 | `Sidebar` / app shell | `src/components/app-shell/` | Authenticated nav shell. |
 | quote/client/auth actions | `src/actions/` | Server-side mutations with validation + audit. |
+| `parseCsv` / `parseXlsx` / `toTable` | `src/lib/import/parse.ts` | Spreadsheet file → `SheetTable` (string cells), CSV + XLSX behind one interface. |
+| `parseMoneyToCents` | `src/lib/import/parse-money.ts` | Strict currency→cents for import — errors on blank/non-numeric (unlike lenient `dollarsToCents`). |
+| `TARGET_FIELDS` / `autoMap` / `buildClientRecord` / `buildProductRecord` / `buildQuoteLineRecord` | `src/lib/import/targets.ts` | Per-target field defs, header auto-mapping, and row→validated-record builders (reuse shared Zod rules). |
+| `buildPreview` / `matchExisting` / `suggestPromotions` | `src/lib/import/resolve.ts` | Exact-match resolution (no fuzzy), count-based product-promotion suggestions, and per-row preview assembly. |
+| `parseUpload` / `previewImport` / `commitImport` | `src/actions/import.ts` | Import pipeline server actions: server-side parse (capped), DB resolve+validate, transactional commit via `import_commit` RPC. |
+| `ImportWizard` | `src/components/import/ImportWizard.tsx` | 3-step import flow (upload → map columns → preview & commit). |
+| `ImportEntryButton` | `src/components/import/ImportEntryButton.tsx` | "Import" link on the Quotes/Clients/Products list headers (deep-links to the pre-targeted wizard). |
