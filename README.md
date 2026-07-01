@@ -44,6 +44,10 @@ Prefer to type credentials? Use `sarah@kwikquote.app` (or `mike@kwikquote.app` /
   a full product catalog (create / edit / soft-delete); shared team workspace.
 - **Lists** — search, column sort, status/unit filters, and pagination across
   quotes, clients, and products.
+- **Responsive & snappy** — works on desktop and mobile (the sidebar collapses
+  into a slide-in drawer on small screens); navigation paints instant loading
+  skeletons while data streams, and auth is verified locally per request
+  (`getClaims`) so there's no round-trip on every click.
 - **Spreadsheet import** — a 3-step import wizard (upload → map columns → preview
   & commit, transactional) is fully built and tested, but **intentionally kept
   off the nav** to keep the demo path focused; reach it at `/import`.
