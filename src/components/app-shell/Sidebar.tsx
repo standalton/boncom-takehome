@@ -16,6 +16,7 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, FileText, Users, Package, LogOut } from "lucide-react";
 import { signOut } from "@/actions/auth";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./ThemeToggle";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -59,6 +60,10 @@ export function Sidebar({ userName }: { userName: string }) {
           );
         })}
       </nav>
+
+      <div className="px-3 pb-2">
+        <ThemeToggle />
+      </div>
 
       <div className="border-t px-3 py-3">
         <div className="px-3 pb-2 text-sm font-medium text-foreground">{userName}</div>

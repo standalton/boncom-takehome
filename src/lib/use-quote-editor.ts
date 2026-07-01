@@ -11,7 +11,7 @@
  */
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { computeTotals } from "@/lib/pricing";
@@ -23,6 +23,7 @@ import type { Client, DiscountType, QuoteStatus } from "@/lib/types";
 import { toClientOption, type ClientOption } from "@/lib/client-option";
 import type { ProductOption } from "@/lib/product-option";
 import { exportQuoteFromEditor } from "@/lib/export-quote";
+import { celebratePaid } from "@/lib/celebrate";
 import type { LineItemPatch } from "@/components/LineItemRow";
 import type { EditorLine } from "@/components/QuoteEditorForm";
 
@@ -47,6 +48,10 @@ export type QuoteEditorInit = {
 let keyCounter = 0;
 const newKey = () => `line-${keyCounter++}`;
 
+// A store that never changes: used with useSyncExternalStore purely to tell the
+// server render (getServerSnapshot) apart from the client (getSnapshot).
+const subscribeNoop = () => () => {};
+
 // A quote counts as "already out to the client" once it has been sent.
 const SENT_STATUSES: QuoteStatus[] = ["sent", "accepted", "paid", "declined"];
 export type SentSibling = { id: string; number: string; status: QuoteStatus };
@@ -68,34 +73,42 @@ export function useQuoteEditor(init: QuoteEditorInit) {
   const [dirty, setDirty] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState(init.updatedAt);
   // Format lastSaved only after mount to avoid a UTC/local hydration mismatch.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // useSyncExternalStore gives false on the server / first client snapshot and
+  // true thereafter — no effect, no cascading setState.
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const [saving, startSave] = useTransition();
   const [statusPending, startStatus] = useTransition();
 
   // Warn when this client already has a quote that's been sent, so the user
   // doesn't send a second, competing quote by accident. Only relevant while the
   // current quote is still an editable draft; refetched when the client changes.
-  const [sentSiblings, setSentSiblings] = useState<SentSibling[]>([]);
+  // The fetched list is tagged with the client it was fetched for, so a stale
+  // result never shows against a different client. The effect only setStates
+  // inside the async resolution (no synchronous reset); the visible list below
+  // is derived, and is empty until the fetch for the *current* client lands.
+  const [siblingsFetch, setSiblingsFetch] = useState<{ clientId: string; list: SentSibling[] }>({
+    clientId: "",
+    list: [],
+  });
   useEffect(() => {
-    if (status !== "draft" || !clientId) {
-      setSentSiblings([]);
-      return;
-    }
+    if (status !== "draft" || !clientId) return;
     let active = true;
     listQuotesByClient(clientId).then((res) => {
       if (!active || !res.ok) return;
       const rows = res.data as unknown as { id: string; number: string; status: QuoteStatus }[];
-      setSentSiblings(
-        rows
+      setSiblingsFetch({
+        clientId,
+        list: rows
           .filter((r) => r.id !== init.id && SENT_STATUSES.includes(r.status))
           .map((r) => ({ id: r.id, number: r.number, status: r.status })),
-      );
+      });
     });
     return () => {
       active = false;
     };
   }, [clientId, status, init.id]);
+  const sentSiblings =
+    status === "draft" && clientId && siblingsFetch.clientId === clientId ? siblingsFetch.list : [];
 
   const selectedClient = clients.find((c) => c.id === clientId);
   const locked = status !== "draft";
@@ -322,6 +335,11 @@ export function useQuoteEditor(init: QuoteEditorInit) {
           onSent?.();
         } else {
           toast.success(`Marked ${next}`);
+          // Celebrate a genuine win: a quote reaching "paid" from any prior
+          // state. Guarded so re-confirming an already-paid quote never re-fires.
+          if (next === "paid" && previous !== "paid") {
+            void celebratePaid();
+          }
         }
       } else {
         toast.error(res.error);
