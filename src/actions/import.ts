@@ -121,7 +121,16 @@ export async function commitImport(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false as const, error: "You must be signed in to import." };
 
-  const { clients, products } = await loadExisting();
+  let clients: ExistingKey[];
+  let products: ExistingKey[];
+  try {
+    ({ clients, products } = await loadExisting());
+  } catch (e) {
+    return {
+      ok: false as const,
+      error: e instanceof Error ? e.message : "Could not load existing records.",
+    };
+  }
   const plan: ImportPlan = { newClients: [], newProducts: [], quotes: [] };
 
   // Temp-id allocators keyed by normalized name so a repeated name reuses one temp id.
@@ -195,14 +204,22 @@ export async function commitImport(
   } else {
     // quotes: group valid line rows into quotes, create clients/products on the fly.
     const groups = new Map<string, CommitQuote>();
+    const groupClientKey = new Map<string, string>();
     for (const row of table.rows) {
       const built = buildQuoteLineRecord(row, mapping);
       if (!built.ok) continue;
       const r = built.record;
+      const clientKey = normalizeKey(r.client);
+      const groupKey = r.quoteGroup ? `q:${normalizeKey(r.quoteGroup)}` : `c:${clientKey}`;
+      // Mirror the preview: a quote group that spans more than one client has its
+      // conflicting rows skipped (shown as errors in the preview) — never merged.
+      // Checked before ensureClientTemp so a skipped row leaves no orphan client.
+      if (r.quoteGroup) {
+        const claimed = groupClientKey.get(groupKey);
+        if (claimed === undefined) groupClientKey.set(groupKey, clientKey);
+        else if (claimed !== clientKey) continue;
+      }
       const clientRef = ensureClientTemp(r.client);
-      const groupKey = r.quoteGroup
-        ? `q:${normalizeKey(r.quoteGroup)}`
-        : `c:${clientRef.clientId ?? clientRef.clientTempId}`;
       let quote = groups.get(groupKey);
       if (!quote) {
         quote = {

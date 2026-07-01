@@ -17,16 +17,20 @@ const discountType = z.enum(["none", "percent", "fixed"]);
 const percentNotOver100 = (data: { discountType: z.infer<typeof discountType>; discountValue: number }) =>
   data.discountType !== "percent" || data.discountValue <= 100;
 
-export const lineItemSchema = z
-  .object({
-    description: z.string().min(1, "Description is required"),
-    quantity: z.number().positive("Quantity must be greater than 0"),
-    rateCents: z.number().int().min(0, "Rate cannot be negative"),
-    discountType,
-    discountValue: z.number().min(0, "Discount cannot be negative"),
-    // Optional link to the catalog product a line was filled from (audit only).
-    productId: z.string().nullable().optional(),
-  })
+// The plain object shape, before the cross-field refinements. Exposed so other
+// layers (e.g. the spreadsheet importer) can `.pick` the exact same field rules
+// instead of re-declaring them — the single source of truth for a line's fields.
+export const lineItemObject = z.object({
+  description: z.string().min(1, "Description is required"),
+  quantity: z.number().positive("Quantity must be greater than 0"),
+  rateCents: z.number().int().min(0, "Rate cannot be negative"),
+  discountType,
+  discountValue: z.number().min(0, "Discount cannot be negative"),
+  // Optional link to the catalog product a line was filled from (audit only).
+  productId: z.string().nullable().optional(),
+});
+
+export const lineItemSchema = lineItemObject
   .refine(percentNotOver100, {
     message: "Percentage discount cannot exceed 100%",
     path: ["discountValue"],

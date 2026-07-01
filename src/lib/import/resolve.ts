@@ -147,6 +147,9 @@ function previewQuotes(input: BuildPreviewInput): ImportPreview {
   const validLines: { description: string; client: string }[] = [];
   const quoteGroups = new Set<string>();
   const newClientKeys = new Set<string>();
+  // Track the client that first claimed each explicit quote group, so a later
+  // row trying to add a different client to the same group is caught, not merged.
+  const groupClient = new Map<string, string>();
 
   input.rows.forEach((row, rowIndex) => {
     const built = buildQuoteLineRecord(row, input.mapping);
@@ -156,14 +159,35 @@ function previewQuotes(input: BuildPreviewInput): ImportPreview {
       return;
     }
     const { record } = built;
-    validLines.push({ description: record.description, client: record.client });
     // Group key: explicit quote group if present, else the client (one quote/client).
     const groupKey = record.quoteGroup
       ? `q:${normalizeKey(record.quoteGroup)}`
       : `c:${normalizeKey(record.client)}`;
+
+    // A single quote can only belong to one client. When rows are grouped by an
+    // explicit quote column, reject a row whose client disagrees with the group's
+    // rather than silently dropping it (no silent failures).
+    const clientKey = normalizeKey(record.client);
+    if (record.quoteGroup) {
+      const claimed = groupClient.get(groupKey);
+      if (claimed === undefined) {
+        groupClient.set(groupKey, clientKey);
+      } else if (claimed !== clientKey) {
+        rows.push({
+          rowIndex,
+          status: "error",
+          message: `Quote "${record.quoteGroup}" has rows for more than one client`,
+          values: { client: record.client, description: record.description },
+        });
+        summary.errors += 1;
+        return;
+      }
+    }
+
+    validLines.push({ description: record.description, client: record.client });
     quoteGroups.add(groupKey);
     const clientMatch = matchExisting(record.client, input.existingClients);
-    if (!clientMatch) newClientKeys.add(normalizeKey(record.client));
+    if (!clientMatch) newClientKeys.add(clientKey);
     summary.importable += 1;
     rows.push({
       rowIndex,

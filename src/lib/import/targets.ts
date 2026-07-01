@@ -10,10 +10,10 @@
  *              parallel logic. A record builder returns { ok:false, error } for a
  *              bad row rather than throwing — the preview shows every bad row.
  */
-import { z } from "zod";
 import type { ColumnMapping, FieldDef, ImportTarget } from "./types";
 import { parseMoneyToCents } from "./parse-money";
 import { isProductUnit } from "@/lib/product-units";
+import { lineItemObject } from "@/lib/validation";
 
 export const TARGET_FIELDS: Record<ImportTarget, FieldDef[]> = {
   clients: [
@@ -142,11 +142,12 @@ export interface QuoteLineRecord {
   rateCents: number;
 }
 
-// Reuse the shared line-item invariants for quantity/rate rather than re-deriving.
-const importLineSchema = z.object({
-  description: z.string().min(1, "Description is required"),
-  quantity: z.number().positive("Quantity must be greater than 0"),
-  rateCents: z.number().int().min(0, "Rate cannot be negative"),
+// Reuse the shared line-item field rules (validation.ts) rather than re-deriving
+// them, so the importer and the editor can never disagree on what a valid line is.
+const importLineSchema = lineItemObject.pick({
+  description: true,
+  quantity: true,
+  rateCents: true,
 });
 
 export function buildQuoteLineRecord(

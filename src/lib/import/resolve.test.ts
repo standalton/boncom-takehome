@@ -99,4 +99,24 @@ describe("buildPreview (quotes)", () => {
     expect(preview.summary.quotes).toBe(2);
     expect(preview.summary.newClients).toBe(2);
   });
+
+  it("flags a quote group that spans more than one client as an error", () => {
+    const withGroup = autoMap("quotes", ["Client", "Quote", "Description", "Qty", "Rate"]);
+    const preview = buildPreview({
+      target: "quotes",
+      rows: [
+        ["Acme", "Q1", "Logo", "1", "1000"],
+        ["Globex", "Q1", "Banner", "1", "500"],
+      ],
+      mapping: withGroup,
+      existingClients: [],
+      existingProducts: [],
+      promotionThreshold: 3,
+    });
+    // First row establishes the group's client; the conflicting second row errors.
+    expect(preview.rows[0].status).toBe("create");
+    expect(preview.rows[1].status).toBe("error");
+    expect(preview.rows[1].message).toMatch(/more than one client/i);
+    expect(preview.summary.quotes).toBe(1);
+  });
 });
