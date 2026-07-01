@@ -10,7 +10,7 @@
  */
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createProduct, updateProduct } from "@/actions/products";
@@ -52,14 +52,19 @@ export function ProductDialog({ open, onOpenChange, product }: Props) {
   const [pending, start] = useTransition();
   const router = useRouter();
 
-  // Seed the form from the product each time the dialog opens.
-  useEffect(() => {
-    if (!open) return;
-    setName(product?.name ?? "");
-    setDescription(product?.description ?? "");
-    setRateCents(product?.default_rate_cents ?? 0);
-    setUnit(product?.unit ?? "");
-  }, [open, product]);
+  // Seed the form from the product each time the dialog opens. Done during
+  // render on the open transition (not in an effect) to avoid a cascading
+  // re-render.
+  const [wasOpen, setWasOpen] = useState(false);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setName(product?.name ?? "");
+      setDescription(product?.description ?? "");
+      setRateCents(product?.default_rate_cents ?? 0);
+      setUnit(product?.unit ?? "");
+    }
+  }
 
   function submit() {
     start(async () => {

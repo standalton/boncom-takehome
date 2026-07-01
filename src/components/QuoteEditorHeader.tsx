@@ -22,7 +22,8 @@ const eyebrow =
   "flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
 
 type Props = {
-  id: string;
+  // null before the quote is first saved (new-quote mode).
+  id: string | null;
   number: string;
   activity: ActivityEntry[];
   status: QuoteStatus;
@@ -65,7 +66,9 @@ export function QuoteEditorHeader({
           Quote <HelpHint text={helpText.quoteNumber} />
         </div>
         <div className="mt-1 flex flex-wrap items-center gap-2.5">
-          <h1 className="text-3xl font-light tracking-tight break-all text-primary">{number}</h1>
+          <h1 className="text-3xl font-light tracking-tight break-all text-primary">
+            {number || "New quote"}
+          </h1>
           {dirty ? (
             <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
               Unsaved
@@ -116,7 +119,8 @@ export function QuoteEditorHeader({
               Edit
             </Button>
           ) : null}
-          <QuoteActionsMenu id={id} number={number} activity={activity} />
+          {/* Duplicate / delete / history only make sense once the quote exists. */}
+          {id && <QuoteActionsMenu id={id} number={number} activity={activity} />}
         </div>
       </div>
     </div>
