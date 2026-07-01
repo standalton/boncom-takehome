@@ -201,3 +201,20 @@ decisions and the reasoning behind them:
   and this decisions log.
 - **Why:** Keep the codebase navigable and easy for a new developer to adopt;
   make the reasoning behind the build explicit for the interview panel.
+
+## 2026-06-30 — List sorting and filtering are URL-driven and server-side
+
+- **Decision:** Column sort + facet filters on the quotes/clients/products lists
+  live in the URL query string (`?sort=&dir=&status=&unit=`) and are applied in
+  the list server actions, mirroring the existing `?q=`/`?page=` pattern. Only
+  plain base-table columns are sortable; joined columns (e.g. quotes by client
+  company) are excluded.
+- **Why:** URL state stays correct across server-side pagination (sorts/filters
+  the whole result set, not just the current page), is shareable and refresh-safe,
+  and reuses the established pattern instead of adding client state. Excluding
+  joined-column sorts avoids the one query path (nullable embedded order) that
+  behaves differently from every other column — disproportionate risk for the
+  lowest-value sort.
+- **Note:** A pure `lib/list-params.ts` validates the untrusted sort param against
+  a per-table allow-list; status/unit filters reuse the existing closed sets
+  (`QUOTE_STATUSES`, `isProductUnit`).

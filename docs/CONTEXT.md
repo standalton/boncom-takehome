@@ -69,6 +69,8 @@ codebase grows. Format:_
 | -------------- | ---------- |
 | Estimate math (totals, tax, discounts) | `src/lib/pricing.ts` |
 | Quote lifecycle (editable? valid transitions?) | `src/lib/quote-status.ts` |
+| List sort parsing/validation (?sort, ?dir) | `src/lib/list-params.ts` |
+| Dashboard metrics + needs-attention (pure) | `src/lib/dashboard.ts` |
 | Currency formatting / parsing | `src/lib/money.ts` |
 | Product billing units (dropdown options + labels) | `src/lib/product-units.ts` |
 | Input validation rules (Zod) | `src/lib/validation.ts` |
@@ -99,6 +101,10 @@ building something new, to avoid duplicating what already exists. Format:_
 | `toActivityEntries` / `ActivityEntry` | `src/lib/activity.ts` | Activity-log row → UI entry shape; used by `listActivity` and the history dialog. |
 | `formatCents` / `dollarsToCents` | `src/lib/money.ts` | Cents <-> display dollar strings. |
 | `PRODUCT_UNITS` / `isProductUnit` / `formatUnit` | `src/lib/product-units.ts` | Closed set of billing units; drives the unit dropdown and server-side validation. |
+| `parseSort` / `applySort` | `src/lib/list-params.ts` | Validate an untrusted sort param against a per-table allow-list; apply it to a Supabase query. |
+| `QUOTE_STATUSES` / `isQuoteStatus` | `src/lib/quote-status.ts` | Closed status set + guard (derived from the transition map); validates the ?status filter. |
+| `SortableHead` | `src/components/SortableHead.tsx` | URL-driven sortable table header (arrow + toggle); preserves other params, resets page. |
+| `FilterSelect` | `src/components/FilterSelect.tsx` | URL-driven facet dropdown (quotes: status, products: unit); "All" clears the param. |
 | `lineItemSchema` / `quoteSchema` | `src/lib/validation.ts` | Shared Zod validation (UI + server). |
 | `HelpHint` + `helpText` | `src/components/HelpHint.tsx`, `src/lib/help-text.ts` | The one tooltip pattern + central copy. |
 | `MoneyInput` | `src/components/MoneyInput.tsx` | Currency input bound to integer cents. |
@@ -115,5 +121,6 @@ building something new, to avoid duplicating what already exists. Format:_
 | `SendQuoteDialog` | `src/components/SendQuoteDialog.tsx` | Confirm-send modal shown when a quote moves to "Sent". |
 | `QuoteEditor` | `src/components/QuoteEditor.tsx` | The core quote editor (editable number, live totals). |
 | `QuoteActivity` | `src/components/QuoteActivity.tsx` | Read-only history timeline of a quote's activity_log (shown in the actions-menu "View history" dialog). |
+| `NeedsAttention` / `DashboardActivityFeed` | `src/components/NeedsAttention.tsx`, `src/components/DashboardActivityFeed.tsx` | Dashboard panels: expiring/expired outstanding quotes, and the global recent-activity feed. |
 | `Sidebar` / app shell | `src/components/app-shell/` | Authenticated nav shell. |
 | quote/client/auth actions | `src/actions/` | Server-side mutations with validation + audit. |
