@@ -111,6 +111,7 @@ building something new, to avoid duplicating what already exists. Format:_
 | `SortableHead` | `src/components/SortableHead.tsx` | URL-driven sortable table header (arrow + toggle); preserves other params, resets page. |
 | `FilterSelect` | `src/components/FilterSelect.tsx` | URL-driven facet dropdown (quotes: status, products: unit); "All" clears the param. |
 | `lineItemSchema` / `quoteSchema` | `src/lib/validation.ts` | Shared Zod validation (UI + server). |
+| `collectQuoteErrors` / `hasAnyError` | `src/lib/quote-errors.ts` | Maps the quote schemas to per-field UI errors; drives the editor's live inline validation. |
 | `HelpHint` + `helpText` | `src/components/HelpHint.tsx`, `src/lib/help-text.ts` | The one tooltip pattern + central copy. |
 | `MoneyInput` | `src/components/MoneyInput.tsx` | Currency input bound to integer cents. |
 | `NumberInput` | `src/components/NumberInput.tsx` | Numeric input (local text state) reporting a parsed number. |
@@ -133,5 +134,4 @@ building something new, to avoid duplicating what already exists. Format:_
 | `TARGET_FIELDS` / `autoMap` / `buildClientRecord` / `buildProductRecord` / `buildQuoteLineRecord` | `src/lib/import/targets.ts` | Per-target field defs, header auto-mapping, and row→validated-record builders (reuse shared Zod rules). |
 | `buildPreview` / `matchExisting` / `suggestPromotions` | `src/lib/import/resolve.ts` | Exact-match resolution (no fuzzy), count-based product-promotion suggestions, and per-row preview assembly. |
 | `parseUpload` / `previewImport` / `commitImport` | `src/actions/import.ts` | Import pipeline server actions: server-side parse (capped), DB resolve+validate, transactional commit via `import_commit` RPC. |
-| `ImportWizard` | `src/components/import/ImportWizard.tsx` | 3-step import flow (upload → map columns → preview & commit). |
-| `ImportEntryButton` | `src/components/import/ImportEntryButton.tsx` | "Import" link on the Quotes/Clients/Products list headers (deep-links to the pre-targeted wizard). |
+| `ImportWizard` | `src/components/import/ImportWizard.tsx` | 3-step import flow (upload → map columns → preview & commit). Reached from the sidebar "Import" item; list empty states deep-link with `?target=`. |

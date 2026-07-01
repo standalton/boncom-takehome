@@ -5,11 +5,11 @@
  *              number of a quote they own) with an "Add client" action.
  * Where used:  The /clients route.
  */
+import Link from "next/link";
 import { listClients } from "@/actions/clients";
 import { parsePage } from "@/lib/pagination";
 import { parseSort, CLIENT_SORTS, CLIENT_SORT_DEFAULT } from "@/lib/list-params";
 import { AddClientDialog } from "@/components/AddClientDialog";
-import { ImportEntryButton } from "@/components/import/ImportEntryButton";
 import { ClientList } from "@/components/ClientList";
 import { Pagination } from "@/components/Pagination";
 import { Input } from "@/components/ui/input";
@@ -30,10 +30,7 @@ export default async function ClientsPage({
     <div className="px-8 py-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-primary">Clients</h1>
-        <div className="flex gap-2">
-          <ImportEntryButton target="clients" />
-          <AddClientDialog />
-        </div>
+        <AddClientDialog />
       </div>
 
       <form className="mb-4 max-w-md">
@@ -53,7 +50,20 @@ export default async function ClientsPage({
         </div>
       ) : clients.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center text-sm text-muted-foreground">
-          {q ? "No clients match your search." : "No clients yet. Add your first client to start a quote."}
+          {q ? (
+            "No clients match your search."
+          ) : (
+            <>
+              No clients yet. Add your first client, or{" "}
+              <Link
+                href="/import?target=clients"
+                className="text-primary underline underline-offset-4"
+              >
+                import a spreadsheet
+              </Link>
+              .
+            </>
+          )}
         </div>
       ) : (
         <>

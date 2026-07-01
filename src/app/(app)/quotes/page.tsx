@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { FilterSelect } from "@/components/FilterSelect";
 import { Pagination } from "@/components/Pagination";
 import { QuoteList, type QuoteListRow } from "@/components/QuoteList";
-import { ImportEntryButton } from "@/components/import/ImportEntryButton";
 
 export default async function QuotesPage({
   searchParams,
@@ -42,13 +41,10 @@ export default async function QuotesPage({
     <div className="px-8 py-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-xl font-semibold text-primary">Quotes</h1>
-        <div className="flex gap-2">
-          <ImportEntryButton target="quotes" />
-          <Link href="/quotes/new" className={buttonVariants({ size: "sm" })}>
-            <Plus className="size-4" />
-            New quote
-          </Link>
-        </div>
+        <Link href="/quotes/new" className={buttonVariants({ size: "sm" })}>
+          <Plus className="size-4" />
+          New quote
+        </Link>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -75,7 +71,17 @@ export default async function QuotesPage({
         </div>
       ) : quotes.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-          {q || status ? "No quotes match your search." : "No quotes yet. Create your first one."}
+          {q || status ? (
+            "No quotes match your search."
+          ) : (
+            <>
+              No quotes yet. Create your first one, or{" "}
+              <Link href="/import?target=quotes" className="text-primary underline underline-offset-4">
+                import a spreadsheet
+              </Link>
+              .
+            </>
+          )}
         </div>
       ) : (
         <>
