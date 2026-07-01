@@ -11,6 +11,7 @@
 import { useRouter } from "next/navigation";
 import { formatCents } from "@/lib/money";
 import type { QuoteStatus } from "@/lib/types";
+import { DeleteQuoteButton } from "@/components/DeleteQuoteButton";
 import {
   Table,
   TableBody,
@@ -51,6 +52,9 @@ export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Total</TableHead>
             <TableHead>Updated</TableHead>
+            <TableHead className="w-10">
+              <span className="sr-only">Actions</span>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -74,6 +78,13 @@ export function QuoteList({ quotes }: { quotes: QuoteListRow[] }) {
               </TableCell>
               <TableCell className="text-muted-foreground">
                 {new Date(quote.updated_at).toISOString().slice(0, 10)}
+              </TableCell>
+              <TableCell className="text-right">
+                <DeleteQuoteButton
+                  id={quote.id}
+                  number={quote.number}
+                  afterDelete={() => router.refresh()}
+                />
               </TableCell>
             </TableRow>
           ))}

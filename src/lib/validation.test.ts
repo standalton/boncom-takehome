@@ -10,7 +10,6 @@ const validLine = {
 };
 
 const validQuote = {
-  number: "QUO-0001",
   clientId: "c1",
   taxRatePercent: 7,
   orderDiscountType: "none" as const,
@@ -62,10 +61,6 @@ describe("validation", () => {
 
   it("accepts a valid quote", () => {
     expect(quoteSchema.safeParse(validQuote).success).toBe(true);
-  });
-
-  it("rejects a quote with no number", () => {
-    expect(quoteSchema.safeParse({ ...validQuote, number: "" }).success).toBe(false);
   });
 
   it("rejects a quote with no client", () => {

@@ -6,6 +6,7 @@
  * Where used:  Passed to the HelpHint component throughout the UI.
  */
 export const helpText = {
+  quoteNumber: "A unique reference automatically generated when the quote is created.",
   client: "Who this quote is for. Pick an existing client or add a new one.",
   status:
     "Where this quote sits in its lifecycle: Draft → Finalized → Sent → Accepted, Paid, or Declined. Accepted/Paid/Declined unlock once the quote has been sent.",

@@ -39,11 +39,6 @@ export const lineItemSchema = z
 // clamps it so the total never goes negative.
 export const quoteSchema = z
   .object({
-    number: z
-      .string()
-      .trim()
-      .min(1, "Quote number is required")
-      .max(40, "Quote number is too long"),
     clientId: z.string().min(1, "A client is required"),
     taxRatePercent: z.number().min(0).max(100, "Tax rate must be between 0 and 100"),
     orderDiscountType: discountType,

@@ -87,7 +87,6 @@ export async function saveQuote(id: string, input: unknown) {
   const { error: upErr } = await supabase
     .from("quotes")
     .update({
-      number: q.number,
       client_id: q.clientId,
       tax_rate: q.taxRatePercent,
       discount_type: q.orderDiscountType,
@@ -102,14 +101,7 @@ export async function saveQuote(id: string, input: unknown) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
-  if (upErr) {
-    // A duplicate number trips the unique constraint (Postgres 23505); surface a
-    // human message instead of the raw DB error.
-    if (upErr.code === "23505") {
-      return { ok: false as const, error: `Quote number "${q.number}" is already in use.` };
-    }
-    return { ok: false as const, error: upErr.message };
-  }
+  if (upErr) return { ok: false as const, error: upErr.message };
 
   const { error: delErr } = await supabase.from("line_items").delete().eq("quote_id", id);
   if (delErr) return { ok: false as const, error: delErr.message };
@@ -159,6 +151,16 @@ export async function setStatus(id: string, status: QuoteStatus) {
     detail: { status },
   });
   revalidatePath(`/quotes/${id}`);
+  revalidatePath("/");
+  return { ok: true as const };
+}
+
+export async function deleteQuote(id: string) {
+  const supabase = await createClient();
+  // Line items and activity-log entries are removed by ON DELETE CASCADE.
+  const { error } = await supabase.from("quotes").delete().eq("id", id);
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath("/quotes");
   revalidatePath("/");
   return { ok: true as const };
 }

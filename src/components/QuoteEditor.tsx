@@ -1,7 +1,7 @@
 /**
  * QuoteEditor.tsx — the core quote editor.
  *
- * What:        Edit a quote's number, client, line items (each with an optional
+ * What:        Edit a quote's client, line items (each with an optional
  *              discount), order-level discount, tax, notes, and status. Totals
  *              update live in a sticky bottom bar that stays pinned as you edit.
  * Where used:  The /quotes/[id] route.
@@ -11,7 +11,8 @@
  */
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, Send, Download, CheckCircle2 } from "lucide-react";
 import { computeTotals } from "@/lib/pricing";
@@ -23,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MoneyInput } from "@/components/MoneyInput";
 import { NumberInput } from "@/components/NumberInput";
-import { selectAllOnFocus } from "@/lib/field-helpers";
 import { HelpHint } from "@/components/HelpHint";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LineItemRow, type LineItemPatch } from "@/components/LineItemRow";
@@ -31,6 +31,7 @@ import { ClientPicker } from "@/components/ClientPicker";
 import { toClientOption, type ClientOption } from "@/lib/client-option";
 import { SendQuoteDialog } from "@/components/SendQuoteDialog";
 import { StatusSelect, StatusBadge, statusMeta } from "@/components/StatusSelect";
+import { DeleteQuoteButton } from "@/components/DeleteQuoteButton";
 import { exportQuotePdf } from "@/lib/export-quote";
 import { DateField } from "@/components/DateField";
 
@@ -47,6 +48,7 @@ export type QuoteEditorProps = {
   id: string;
   number: string;
   status: QuoteStatus;
+  updatedAt: string;
   clientId: string;
   clients: ClientOption[];
   taxRatePercent: number;
@@ -64,7 +66,6 @@ let keyCounter = 0;
 const newKey = () => `line-${keyCounter++}`;
 
 export function QuoteEditor(props: QuoteEditorProps) {
-  const [number, setNumber] = useState(props.number);
   const [clients, setClients] = useState<ClientOption[]>(props.clients);
   const [clientId, setClientId] = useState(props.clientId);
   const [status, setStatusState] = useState<QuoteStatus>(props.status);
@@ -76,9 +77,15 @@ export function QuoteEditor(props: QuoteEditorProps) {
   const [notes, setNotes] = useState(props.notes);
   const [lines, setLines] = useState<EditorLine[]>(props.lines.map((l) => ({ ...l, key: newKey() })));
   const [dirty, setDirty] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState(props.updatedAt);
+  // Format the timestamp only after mount: toLocaleString differs between the
+  // server (UTC) and the client (local), which would trip a hydration mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [saving, startSave] = useTransition();
   const [statusPending, startStatus] = useTransition();
   const selectedClient = clients.find((c) => c.id === clientId);
+  const router = useRouter();
 
   const totals = useMemo(
     () =>
@@ -119,7 +126,6 @@ export function QuoteEditor(props: QuoteEditorProps) {
   function save() {
     startSave(async () => {
       const res = await saveQuote(props.id, {
-        number,
         clientId,
         taxRatePercent,
         orderDiscountType,
@@ -137,6 +143,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
       if (res.ok) {
         toast.success("Saved");
         setDirty(false);
+        setLastSavedAt(new Date().toISOString());
       } else {
         toast.error(res.error);
       }
@@ -156,7 +163,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
         : "";
     try {
       await exportQuotePdf({
-        number,
+        number: props.number,
         statusLabel: statusMeta[status].label,
         issuedOn: pretty(new Date().toISOString().slice(0, 10)),
         validUntil: pretty(validUntil),
@@ -186,7 +193,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
         totalCents: totals.totalCents,
         taxRatePercent,
       });
-      toast.success(`Exported ${number}.pdf`);
+      toast.success(`Exported ${props.number}.pdf`);
     } catch {
       toast.error("Could not export the PDF.");
     }
@@ -216,30 +223,35 @@ export function QuoteEditor(props: QuoteEditorProps) {
     <>
       <div className="px-8 pt-8 pb-32">
         {/* Header */}
-        <div className="mx-auto mb-8 flex max-w-3xl flex-wrap items-center justify-between gap-6 border-b pb-6">
+        <div className="mx-auto mb-8 flex max-w-3xl items-start justify-between gap-6 border-b pb-6">
           <div className="min-w-0">
-            <div className={eyebrow}>Quote</div>
-            <div className="mt-1 flex flex-wrap items-center gap-3">
-              <input
-                aria-label="Quote number"
-                value={number}
-                {...selectAllOnFocus}
-                onChange={(e) => {
-                  setNumber(e.target.value);
-                  setDirty(true);
-                }}
-                className="min-w-[6ch] rounded-lg border border-input bg-background px-2.5 py-1 text-3xl font-light tracking-tight text-primary outline-none transition-colors [field-sizing:content] hover:border-ring/70 hover:bg-muted/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
-              />
-              {dirty && (
+            <div className={eyebrow}>
+              Quote <HelpHint text={helpText.quoteNumber} />
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-2.5">
+              <h1 className="text-3xl font-light tracking-tight break-all text-primary">
+                {props.number}
+              </h1>
+              {dirty ? (
                 <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
                   Unsaved
                 </span>
-              )}
+              ) : mounted && lastSavedAt ? (
+                <span className="text-xs text-muted-foreground">
+                  Saved{" "}
+                  {new Date(lastSavedAt).toLocaleString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
+              ) : null}
             </div>
           </div>
 
           {/* Status + validity, side by side */}
-          <div className="flex shrink-0 flex-wrap items-end gap-4">
+          <div className="flex shrink-0 items-end gap-4">
             <div className="space-y-1.5">
               <label className={eyebrow}>
                 Status <HelpHint text={helpText.status} />
@@ -264,9 +276,16 @@ export function QuoteEditor(props: QuoteEditorProps) {
                 }}
               />
             </div>
-            <Button onClick={save} disabled={saving} className="h-9 self-end">
-              {saving ? "Saving…" : "Save"}
-            </Button>
+            <div className="flex items-center gap-2 self-end">
+              <DeleteQuoteButton
+                id={props.id}
+                number={props.number}
+                afterDelete={() => router.push("/quotes")}
+              />
+              <Button onClick={save} disabled={saving} className="h-9 min-w-20">
+                {saving ? "Saving…" : "Save"}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -490,7 +509,7 @@ export function QuoteEditor(props: QuoteEditorProps) {
       <SendQuoteDialog
         open={sendOpen}
         onOpenChange={setSendOpen}
-        quoteNumber={number}
+        quoteNumber={props.number}
         client={selectedClient}
         pending={statusPending}
         onConfirm={() => applyStatus("sent", () => setSendOpen(false))}
